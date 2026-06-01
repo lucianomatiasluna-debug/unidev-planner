@@ -1,5 +1,6 @@
 import datetime
 import hashlib
+import os
 
 # Datos de la rutina planificada (mayo 31 - julio 1, 2026)
 seed = {
@@ -37,14 +38,19 @@ seed = {
     '2026-07-01': [('Trabajo', 'work', '10:00', '16:00'), ('Viaje y despeje', 'travel', '16:00', '17:00'), ('Repaso último momento', 'study', '17:00', '19:00'), ('📝 PARCIAL: Costos Industriales', 'exam', '19:00', '22:00'), ('Cocinar y cenar', 'eat', '22:00', '24:00')]
 }
 
-def create_ics():
-    lines = [
-        "BEGIN:VCALENDAR",
-        "VERSION:2.0",
-        "PRODID:-//Unidev Planner//NONSGML v1.0//EN",
-        "CALSCALE:GREGORIAN",
-        "METHOD:PUBLISH"
-    ]
+categories = {
+    'work': ('Trabajo', '💼'),
+    'travel': ('Viaje', '🚗'),
+    'study': ('Estudio', '📚'),
+    'eat': ('Comer', '🍽️'),
+    'rest': ('Descanso', '😴'),
+    'exam': ('Examen', '📝')
+}
+
+def generate_ics_files():
+    # Estructuras para almacenar los eventos
+    by_category = {cat: [] for cat in categories.keys()}
+    all_events = []
     
     for date_str, events in seed.items():
         y, m, d = map(int, date_str.split('-'))
@@ -61,42 +67,53 @@ def create_ics():
             if end == '24:00':
                 end_dt = end_dt + datetime.timedelta(minutes=1)
                 
-            # Formato ICS: YYYYMMDDTHHMMSS
-            # Para Google Calendar es mejor usar hora local con zona horaria o UTC. 
-            # Como estás en Buenos Aires, usaremos la TZ local.
             start_str = start_dt.strftime('%Y%m%dT%H%M%S')
             end_str = end_dt.strftime('%Y%m%dT%H%M%S')
             
             uid_hash = hashlib.md5(f"{name}{date_str}{start}{end}".encode('utf-8')).hexdigest()
-            uid = f"{uid_hash}@unidev.planner"
+            uid = f"{uid_hash}@{category}.unidev"
             
-            # Asignar emoji según categoría
-            emoji = "📚"
-            if category == "work": emoji = "💼"
-            elif category == "travel": emoji = "🚗"
-            elif category == "eat": emoji = "🍽️"
-            elif category == "rest": emoji = "😴"
-            elif category == "exam": emoji = "📝"
-            
+            emoji = categories[category][1]
             title = f"{emoji} {name}"
             
-            lines.extend([
+            event_lines = [
                 "BEGIN:VEVENT",
                 f"UID:{uid}",
-                f"DTSTAMP:{datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}",
+                f"DTSTAMP:20260601T000000Z",
                 f"DTSTART;TZID=America/Argentina/Buenos_Aires:{start_str}",
                 f"DTEND;TZID=America/Argentina/Buenos_Aires:{end_str}",
                 f"SUMMARY:{title}",
-                f"DESCRIPTION:Categoría original del plan: {category}",
+                f"DESCRIPTION:Categoría: {categories[category][0]}",
                 "STATUS:CONFIRMED",
                 "END:VEVENT"
-            ])
+            ]
             
-    lines.append("END:VCALENDAR")
+            all_events.extend(event_lines)
+            by_category[category].extend(event_lines)
+            
+    # Escribir archivo consolidado
+    write_calendar_file("unidev_routine.ics", all_events)
     
-    with open("unidev_routine.ics", "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
-    print("unidev_routine.ics generado con éxito!")
+    # Escribir archivos individuales por categoría
+    os.makedirs("categories", exist_ok=True)
+    for cat, events in by_category.items():
+        filename = f"categories/unidev_{cat}.ics"
+        write_calendar_file(filename, events)
+        print(f"Generado: {filename}")
+
+def write_calendar_file(filepath, event_lines):
+    header = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Unidev Planner//NONSGML v1.0//EN",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH"
+    ]
+    footer = ["END:VCALENDAR"]
+    content = header + event_lines + footer
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("\n".join(content))
 
 if __name__ == "__main__":
-    create_ics()
+    generate_ics_files()
+    print("¡Todos los archivos ICS individuales han sido generados en la carpeta 'categories'!")
