@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Unidev Daily Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --white: #ffffff;
+            --border: #e4e4e7;
+            --border-light: #f0f0f2;
+            --text-dark: #18181b;
+            --text-mid: #52525b;
+            --text-muted: #a1a1aa;
+            --red-marker: #ef4444;
+
+            --cat-work: #0284c7;
+            --cat-work-bg: #f0f9ff;
+            --cat-travel: #d97706;
+            --cat-travel-bg: #fffbeb;
+            --cat-study: #4f46e5;
+            --cat-study-bg: #eef2ff;
+            --cat-eat: #059669;
+            --cat-eat-bg: #ecfdf5;
+            --cat-rest: #db2777;
+            --cat-rest-bg: #fdf2f8;
+            --cat-exam: #dc2626;
+            --cat-exam-bg: #fef2f2;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'DIN', 'DIN Alternate', 'Barlow', sans-serif;
+            font-weight: 300;
+            background: var(--bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 0;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 460px;
+            min-height: 100vh;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border-light);
+            border-right: 1px solid var(--border-light);
+        }
+
+        /* ── TOP BAR ── */
+        .top-bar {
+            padding: 1.2rem 1.4rem 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .app-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+
+        .clock {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+        }
+
+        /* ── VIEW TABS ── */
+        .view-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .view-tab {
+            padding: 0.85rem 0;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.25s;
+            font-family: inherit;
+        }
+
+        .view-tab.active {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .view-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 15%;
+            width: 70%;
+            height: 2px;
+            background: var(--text-dark);
+            border-radius: 2px;
+        }
+
+        /* ── DATE BANNER ── */
+        .date-banner {
+            padding: 0.8rem 1.4rem;
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: var(--text-mid);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .date-banner strong { font-weight: 600; color: var(--text-dark); }
+
+        .phase-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+            background: var(--cat-study-bg);
+            color: var(--cat-study);
+        }
+
+        .phase-badge.exam-day {
+            background: var(--cat-exam-bg);
+            color: var(--cat-exam);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* ── VIEW CONTAINERS ── */
+        .view-today, .view-calendar { flex: 1; overflow-y: auto; display: none; flex-direction: column; }
+        .view-today.visible, .view-calendar.visible { display: flex; }
+
+        /* ── TIMELINE ── */
+        .timeline-scroll { flex: 1; overflow-y: auto; padding: 0.5rem 1rem 5rem 0; }
+
+        .timeline {
+            position: relative;
+            margin-left: 58px;
+            border-left: 1px solid var(--border);
+        }
+
+        .hour-row {
+            position: relative;
+            height: 60px;
+            border-bottom: 1px dashed var(--border-light);
+        }
+
+        .hour-label {
+            position: absolute;
+            left: -58px;
+            top: -8px;
+            width: 48px;
+            text-align: right;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        /* ── TIME BLOCKS ── */
+        .time-block {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            border-radius: 8px;
+            padding: 0.55rem 0.85rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            transition: transform 0.15s;
+            z-index: 5;
+        }
+
+        .time-block:active { transform: scale(0.97); }
+
+        .block-name { font-weight: 600; font-size: 0.88rem; letter-spacing: -0.2px; line-height: 1.2; }
+        .block-hours { font-size: 0.72rem; font-weight: 400; margin-top: 2px; }
+
+        .block-work   { background: var(--cat-work-bg);   border-color: var(--cat-work); }
+        .block-work   .block-name  { color: var(--cat-work); }
+        .block-work   .block-hours { color: rgba(2,132,199,0.65); }
+
+        .block-travel { background: var(--cat-travel-bg); border-color: var(--cat-travel); }
+        .block-travel .block-name  { color: var(--cat-travel); }
+        .block-travel .block-hours { color: rgba(217,119,6,0.65); }
+
+        .block-study  { background: var(--cat-study-bg);  border-color: var(--cat-study); }
+        .block-study  .block-name  { color: var(--cat-study); }
+        .block-study  .block-hours { color: rgba(79,70,229,0.65); }
+
+        .block-eat    { background: var(--cat-eat-bg);    border-color: var(--cat-eat); }
+        .block-eat    .block-name  { color: var(--cat-eat); }
+        .block-eat    .block-hours { color: rgba(5,150,105,0.65); }
+
+        .block-rest   { background: var(--cat-rest-bg);   border-color: var(--cat-rest); }
+        .block-rest   .block-name  { color: var(--cat-rest); }
+        .block-rest   .block-hours { color: rgba(219,39,119,0.65); }
+
+        .block-exam   { background: var(--cat-exam-bg);   border-color: var(--cat-exam); }
+        .block-exam   .block-name  { color: var(--cat-exam); }
+        .block-exam   .block-hours { color: rgba(220,38,38,0.65); }
+
+        /* ── NOW LINE ── */
+        .now-line {
+            position: absolute;
+            left: -10px;
+            right: 0;
+            height: 1.5px;
+            background: var(--red-marker);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .now-line::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: -4px;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--red-marker);
+            box-shadow: 0 0 4px rgba(239,68,68,0.5);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state span { font-size: 2.5rem; display: block; margin-bottom: 0.8rem; }
+
+        /* ── CALENDAR VIEW ── */
+        .calendar-wrapper { padding: 1rem 1.4rem; }
+
+        .cal-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .cal-nav-btn {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.4rem 0.7rem;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--text-mid);
+            transition: background 0.2s;
+        }
+
+        .cal-nav-btn:hover { background: var(--bg); }
+
+        .cal-month-title { font-size: 1.05rem; font-weight: 600; text-transform: capitalize; }
+
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+
+        .cal-weekday {
+            text-align: center;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.5rem 0;
+        }
+
+        .cal-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 400;
+            color: var(--text-mid);
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            border: 1px solid transparent;
+        }
+
+        .cal-day:hover { background: var(--bg); }
+        .cal-day.today { background: var(--text-dark); color: #fff; font-weight: 600; }
+        .cal-day.selected { border-color: var(--text-dark); font-weight: 600; color: var(--text-dark); }
+        .cal-day.today.selected { background: var(--text-dark); color: #fff; }
+        .cal-day.has-events::after { content:''; position:absolute; bottom:4px; width:4px; height:4px; border-radius:50%; background:var(--cat-study); }
+        .cal-day.today.has-events::after { background: #fff; }
+        .cal-day.has-exam::after { background: var(--cat-exam) !important; width: 6px; height: 6px; bottom: 3px; }
+        .cal-day.other-month { color: var(--text-muted); opacity: 0.4; }
+
+        .cal-day-schedule { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+        .cal-day-schedule-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-mid);
+            margin-bottom: 0.8rem;
+        }
+
+        .cal-event-row {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border-light);
+            cursor: pointer;
+        }
+
+        .cal-event-time { font-size: 0.78rem; font-weight: 500; color: var(--text-muted); min-width: 90px; letter-spacing: 0.3px; }
+        .cal-event-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .cal-event-name { font-size: 0.9rem; font-weight: 500; }
+
+        /* ── FAB ── */
+        .fab {
+            position: fixed;
+            bottom: 1.5rem;
+            right: calc(50% - 205px);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--text-dark);
+            border: none;
+            color: #fff;
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+            z-index: 80;
+            transition: transform 0.15s;
+        }
+
+        .fab:active { transform: scale(0.88); }
+        @media (max-width: 460px) { .fab { right: 1.2rem; } }
+
+        /* ── DRAWER ── */
+        .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.25); backdrop-filter:blur(2px); z-index:90; }
+
+        .drawer {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 460px;
+            background: var(--white);
+            border-top: 1px solid var(--border);
+            border-radius: 1.2rem 1.2rem 0 0;
+            padding: 1.5rem;
+            box-shadow: 0 -8px 30px rgba(0,0,0,0.08);
+            z-index: 100;
+            animation: slideUp 0.25s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translate(-50%, 100%); }
+            to   { transform: translate(-50%, 0); }
+        }
+
+        .drawer-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; }
+        .drawer-head h3 { font-size:1.05rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+        .drawer-close { background:none; border:none; font-size:1.5rem; color:var(--text-muted); cursor:pointer; }
+
+        .field { margin-bottom: 1rem; }
+        .field label { display:block; font-size:0.72rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:0.35rem; }
+        .field input, .field select { width:100%; padding:0.7rem 0.8rem; font-family:inherit; font-size:0.92rem; font-weight:400; color:var(--text-dark); background:var(--bg); border:1px solid var(--border); border-radius:8px; }
+        .field input:focus, .field select:focus { outline:none; border-color:var(--text-dark); }
+        .field-row { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
+
+        .btn-save { width:100%; padding:0.85rem; background:var(--text-dark); color:#fff; border:none; border-radius:8px; font-family:inherit; font-size:0.95rem; font-weight:600; letter-spacing:0.5px; cursor:pointer; margin-top:0.4rem; }
+        .btn-save:active { opacity:0.8; }
+
+        /* ── ACTION STRIP ── */
+        .action-strip { display:flex; gap:0.6rem; padding:0.8rem 1.4rem; border-top:1px solid var(--border); }
+        .action-btn { flex:1; padding:0.55rem; text-align:center; font-family:inherit; font-size:0.8rem; font-weight:500; letter-spacing:0.3px; color:var(--text-mid); background:var(--bg); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:background 0.2s; }
+        .action-btn:hover { background:var(--border-light); }
+        .action-btn.danger { color:var(--red-marker); }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <div class="top-bar">
+        <div class="app-title">Planificador</div>
+        <div class="clock" id="clock">--:--</div>
+    </div>
+
+    <div class="view-tabs">
+        <button class="view-tab active" id="tab-today" onclick="showView('today')">Rutina Hoy</button>
+        <button class="view-tab" id="tab-calendar" onclick="showView('calendar')">Calendario</button>
+    </div>
+
+    <!-- TODAY VIEW -->
+    <div class="view-today visible" id="view-today">
+        <div class="date-banner" id="today-banner"></div>
+        <div class="timeline-scroll" id="timeline-scroll">
+            <div class="timeline" id="timeline">
+                <div class="now-line" id="now-line"></div>
+                <div id="hour-ticks"></div>
+                <div id="blocks-layer"></div>
+            </div>
+        </div>
+        <div class="action-strip">
+            <button class="action-btn" onclick="seedAllData()">Recargar Rutina</button>
+            <button class="action-btn danger" onclick="clearDay()">Vaciar Día</button>
+        </div>
+    </div>
+
+    <!-- CALENDAR VIEW -->
+    <div class="view-calendar" id="view-calendar">
+        <div class="calendar-wrapper">
+            <div class="cal-nav">
+                <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+                <span class="cal-month-title" id="cal-month-title"></span>
+                <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+            <div class="cal-day-schedule" id="cal-day-schedule"></div>
+        </div>
+    </div>
+</div>
+
+<button class="fab" onclick="openDrawer()">+</button>
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+
+<div class="drawer" id="drawer">
+    <div class="drawer-head">
+        <h3>Nueva Actividad</h3>
+        <button class="drawer-close" onclick="closeDrawer()">×</button>
+    </div>
+    <form id="act-form" onsubmit="saveActivity(event)">
+        <div class="field">
+            <label>Nombre</label>
+            <input type="text" id="f-name" placeholder="Ej: Clase de Física" required>
+        </div>
+        <div class="field">
+            <label>Categoría</label>
+            <select id="f-cat" required>
+                <option value="work">💼  Trabajo</option>
+                <option value="travel">🚗  Viaje / Desplazamiento</option>
+                <option value="study">📚  Estudio</option>
+                <option value="eat">🍽️  Almuerzo / Cena</option>
+                <option value="rest">😴  Descanso / Ocio</option>
+                <option value="exam">📝  Examen / Parcial</option>
+            </select>
+        </div>
+        <div class="field">
+            <div class="field-row">
+                <div><label>Inicio</label><input type="time" id="f-start" required></div>
+                <div><label>Fin</label><input type="time" id="f-end" required></div>
+            </div>
+        </div>
+        <button type="submit" class="btn-save">Guardar Actividad</button>
+    </form>
+</div>
+
+<script>
+/* ─── CONFIG ─── */
+const H_START = 8, H_END = 24, PX_HOUR = 60;
+
+/* ─── STATE ─── */
+let currentView = 'today';
+let calYear, calMonth, calSelectedDate = null;
+
+const dayNames  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+/* Exam dates for badge detection */
+const examDates = {
+    '2026-06-16': 'Parcial Prob y Est',
+    '2026-06-19': 'Parcial Único Física 1',
+    '2026-07-01': 'Parcial Costos Ind.'
+};
+
+function todayKey() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function dateKey(y,m,d) {
+    return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+}
+
+function sk(dateStr) { return `unidev_plan_${dateStr}`; }
+function getBlocks(ds) { return JSON.parse(localStorage.getItem(sk(ds)) || '[]'); }
+function setBlocks(ds, arr) { localStorage.setItem(sk(ds), JSON.stringify(arr)); }
+function t2d(t) { const [h,m] = t.split(':').map(Number); return h + m/60; }
+
+function getPhase(dateStr) {
+    if(dateStr >= '2026-06-01' && dateStr <= '2026-06-19') return '📅 Fase 1 · Prob&Est + Física';
+    if(dateStr >= '2026-06-20' && dateStr <= '2026-07-01') return '📅 Fase 2 · Costos Industriales';
+    return null;
+}
+
+/* ─── COMPLETE ROUTINE DATA SEED ─── */
+function seedAllData() {
+    if(!confirm('¿Cargar toda la rutina planificada (Fase 1 y Fase 2)? Esto sobreescribirá los datos existentes.')) return;
+    writeSeedData();
+    if(currentView === 'today') renderToday();
+    else renderCalendar();
+}
+
+function writeSeedData() {
+    let id = 1;
+    function b(name, cat, start, end) { return { id: String(id++), name, category: cat, start, end }; }
+
+    /* Helper blocks */
+    const TRABAJO    = () => b('Trabajo','work','10:00','16:00');
+    const VIAJE      = () => b('Viaje y despeje','travel','16:00','17:00');
+    const CENA_L     = () => b('Cocinar y cenar','eat','20:00','22:00');
+    const CENA_N     = () => b('Cocinar y cenar','eat','22:00','24:00');
+    const OCIO_TARDE = () => b('Tiempo de ocio libre','rest','16:00','24:00');
+
+    /* ═══ Mayo 31 (Dom - Hoy) ═══ */
+    setBlocks('2026-05-31', [
+        b('CS50: Introduction to CS','study','10:00','13:00'),
+        b('Repaso Facultad','study','13:00','16:00'),
+        OCIO_TARDE()
+    ]);
+
+    /* ═══ FASE 1: Junio 1 – 19 ═══ */
+
+    /* Jun 1 (Lun) */
+    setBlocks('2026-06-01', [
+        TRABAJO(), VIAJE(),
+        b('Física 1 – Práctica y ejercicios','study','17:00','20:00'),
+        CENA_L(),
+        b('Prob y Est – Repaso conceptual','study','22:00','24:00')
+    ]);
+
+    /* Jun 2 (Mar) */
+    setBlocks('2026-06-02', [
+        TRABAJO(), VIAJE(),
+        b('Repaso previo: Prob y Estadística','study','17:00','19:00'),
+        b('Cursada: Probabilidad y Estadística','study','19:00','22:00'),
+        CENA_N()
+    ]);
+
+    /* Jun 3 (Mié) */
+    setBlocks('2026-06-03', [
+        TRABAJO(), VIAJE(),
+        b('Repaso previo: Costos Industriales','study','17:00','19:00'),
+        b('Cursada: Costos Industriales','study','19:00','22:00'),
+        CENA_N()
+    ]);
+
+    /* Jun 4 (Jue) */
+    setBlocks('2026-06-04', [
+        TRABAJO(), VIAJE(),
+        b('Prob y Est – Parciales viejos','study','17:00','20:00'),
+        CENA_L(),
+        b('Física 1 – Repaso del día','study','22:00','24:00')
+    ]);
+
+    /* Jun 5 (Vie) */
+    setBlocks('2026-06-05', [
+        TRABAJO(), VIAJE(),
+        b('Repaso previo: Física 1','study','17:00','19:00'),
+        b('Cursada: Física 1','study','19:00','22:00'),
+        CENA_N()
+    ]);
+
+    /* Jun 6 (Sáb) */
+    setBlocks('2026-06-06', [
+        b('Física 1 – Estudio fuerte','study','10:00','13:00'),
+        b('Prob y Est – Estudio fuerte','study','13:00','16:00'),
+        OCIO_TARDE()
+    ]);
+
+    /* Jun 7 (Dom) */
+    setBlocks('2026-06-07', [
+        b('CS50: Introduction to CS','study','10:00','13:00'),
+        b('Física 1 – Repaso','study','13:00','14:30'),
+        b('Prob y Est – Repaso','study','14:30','16:00'),
+        OCIO_TARDE()
+    ]);
+
+    /* Jun 8 (Lun) – mirror Jun 1 */
+    setBlocks('2026-06-08', [
+        TRABAJO(), VIAJE(),
+        b('Física 1 – Práctica y ejercicios','study','17:00','20:00'),
+        CENA_L(),
+        b('Prob y Est – Repaso conceptual','study','22:00','24:00')
+    ]);
+
+    /* Jun 9 (Mar) */
+    setBlocks('2026-06-09', [
+        TRABAJO(), VIAJE(),
+        b('Repaso previo: Prob y Estadística','study','17:00','19:00'),
+        b('Cursada: Probabilidad y Estadística','study','19:00','22:00'),
+        CENA_N()
+    ]);
+
+    /* Jun 10 (Mié) */
+    setBlocks('2026-06-10', [
+        TRABAJO(), VIAJE(),
+        b('Repaso previo: Costos Industriales','study','17:00','19:00'),
+        b('Cursada: Costos Industriales','study','19:00','22:00'),
+        CENA_N()
+    ]);
+
+    /* Jun 11 (Jue) */
+    setBlocks('2026-06-11', [
+        TRABAJO(), VIAJE(),
+        b('Prob y Est – Parciales viejos','study','17:00','20:00'),
+        CENA_L(),
+        b('Física 1 – Repaso del día','study','22:00','24:00')
+    ]);
+
+    /* Jun 12 (Vie) */
+    setBlocks('2026-06-12', [
+        TRABAJO(), VIAJE(),
+        b('Repaso previo: Física 1','study','17:00','19:00'),
+        b('Cursada: Física 1','study','19:00','22:00'),
+        CENA_N()
+    ]);
+
+    /* Jun 13 (Sáb) */
+    setBlocks('2026-06-13', [
+        b('Física 1 – Estudio fuerte','study','10:00','13:00'),
+        b('Prob y Est – Estudio fuerte','study','13:00','16:00'),
+        OCIO_TARDE()
+    ]);
+
+    /* Jun 14 (Dom) */
+    setBlocks('2026-06-14', [
+        b('CS50: Introduction to CS','study','10:00','13:00'),
+        b('Física 1 – Repaso','study','13:00','14:30'),
+        b('Prob y Est – Repaso','study','14:30','16:00'),
+        OCIO_TARDE()
+    ]);
+
+    /* 🔥 Jun 15 (Lun) – DÍA PREVIO A PARCIAL PROB */
+    setBlocks('2026-06-15', [
+        TRABAJO(), VIAJE(),
+        b('🔥 Prob y Est – Repaso INTENSIVO','study','17:00','20:00'),
+        CENA_L(),
+        b('🔥 Prob y Est – Repaso FINAL','study','22:00','24:00')
+    ]);
+
+    /* 📝 Jun 16 (Mar) – PARCIAL PROB Y EST */
+    setBlocks('2026-06-16', [
+        TRABAJO(), VIAJE(),
+        b('Repaso último momento Prob y Est','study','17:00','19:00'),
+        b('📝 PARCIAL: Probabilidad y Estadística','exam','19:00','22:00'),
+        CENA_N()
+    ]);
+
+    /* Jun 17 (Mié) */
+    setBlocks('2026-06-17', [
+        TRABAJO(), VIAJE(),
+        b('Física 1 – Repaso intensivo','study','17:00','19:00'),
+        b('Cursada: Costos Industriales','study','19:00','22:00'),
+        CENA_N()
+    ]);
+
+    /* 🔥 Jun 18 (Jue) – DÍA PREVIO A PARCIAL FÍSICA */
+    setBlocks('2026-06-18', [
+        TRABAJO(), VIAJE(),
+        b('🔥 Física 1 – Repaso INTENSIVO','study','17:00','20:00'),
+        CENA_L(),
+        b('🔥 Física 1 – Repaso FINAL','study','22:00','24:00')
+    ]);
+
+    /* 📝 Jun 19 (Vie) – PARCIAL ÚNICO FÍSICA 1 */
+    setBlocks('2026-06-19', [
+        TRABAJO(), VIAJE(),
+        b('Repaso último momento Física 1','study','17:00','19:00'),
+        b('📝 PARCIAL ÚNICO: Física 1','exam','19:00','22:00'),
+        CENA_N()
+    ]);
+
+    /* ═══ FASE 2: Junio 20 – Julio 1 ═══ */
+
+    /* Jun 20 (Sáb) */
+    setBlocks('2026-06-20', [
+        b('Costos Industriales – Inicio fase intensiva','study','10:00','16:00'),
+        OCIO_TARDE()
+    ]);
+
+    /* Jun 21 (Dom) */
+    setBlocks('2026-06-21', [
+        b('CS50: Introduction to CS','study','10:00','13:00'),
+        b('Costos Industriales – Teoría','study','13:00','16:00'),
+        OCIO_TARDE()
+    ]);
+
+    /* Jun 22 (Lun) */
+    setBlocks('2026-06-22', [
+        TRABAJO(), VIAJE(),
+        b('Costos Industriales – Ejercicios','study','17:00','20:00'),
+        CENA_L(),
+        b('Costos Industriales – Teoría','study','22:00','24:00')
+    ]);
+
+    /* Jun 23 (Mar) */
+    setBlocks('2026-06-23', [
+        TRABAJO(), VIAJE(),
+        b('Costos Industriales – Repaso','study','17:00','19:00'),
+        b('Cursada: Probabilidad y Estadística','study','19:00','22:00'),
+        CENA_N()
+    ]);
+
+    /* Jun 24 (Mié) */
+    setBlocks('2026-06-24', [
+        TRABAJO(), VIAJE(),
+        b('Costos Industriales – Repaso previo','study','17:00','19:00'),
+        b('Cursada: Costos Industriales','study','19:00','22:00'),
+        CENA_N()
+    ]);
+
+    /* Jun 25 (Jue) */
+    setBlocks('2026-06-25', [
+        TRABAJO(), VIAJE(),
+        b('Costos Industriales – Ejercicios','study','17:00','20:00'),
+        CENA_L(),
+        b('Costos Industriales – Presupuestos','study','22:00','24:00')
+    ]);
+
+    /* Jun 26 (Vie) */
+    setBlocks('2026-06-26', [
+        TRABAJO(), VIAJE(),
+        b('Costos Industriales – Repaso','study','17:00','19:00'),
+        b('Cursada: Física 1','study','19:00','22:00'),
+        CENA_N()
+    ]);
+
+    /* Jun 27 (Sáb) – Simulacro */
+    setBlocks('2026-06-27', [
+        b('Costos Industriales – Simulacro de examen','study','10:00','16:00'),
+        OCIO_TARDE()
+    ]);
+
+    /* Jun 28 (Dom) – Simulacro */
+    setBlocks('2026-06-28', [
+        b('CS50: Introduction to CS','study','10:00','13:00'),
+        b('Costos Industriales – Simulacro de examen','study','13:00','16:00'),
+        OCIO_TARDE()
+    ]);
+
+    /* Jun 29 (Lun) */
+    setBlocks('2026-06-29', [
+        TRABAJO(), VIAJE(),
+        b('Costos Industriales – Repaso intensivo','study','17:00','20:00'),
+        CENA_L(),
+        b('Costos Industriales – Repaso final','study','22:00','24:00')
+    ]);
+
+    /* 🔥 Jun 30 (Mar) – DÍA PREVIO PARCIAL COSTOS */
+    setBlocks('2026-06-30', [
+        TRABAJO(), VIAJE(),
+        b('🔥 Costos Industriales – Repaso FINAL','study','17:00','19:00'),
+        b('Cursada: Probabilidad y Estadística','study','19:00','22:00'),
+        b('🔥 Costos – Último repaso','study','22:00','24:00')
+    ]);
+
+    /* 📝 Jul 1 (Mié) – PARCIAL COSTOS INDUSTRIALES */
+    setBlocks('2026-07-01', [
+        TRABAJO(), VIAJE(),
+        b('Repaso último momento Costos','study','17:00','19:00'),
+        b('📝 PARCIAL: Costos Industriales','exam','19:00','22:00'),
+        CENA_N()
+    ]);
+}
+
+/* ─── VIEW SWITCHING ─── */
+function showView(v) {
+    currentView = v;
+    document.getElementById('tab-today').classList.toggle('active', v==='today');
+    document.getElementById('tab-calendar').classList.toggle('active', v==='calendar');
+    document.getElementById('view-today').classList.toggle('visible', v==='today');
+    document.getElementById('view-calendar').classList.toggle('visible', v==='calendar');
+    if(v === 'today') renderToday();
+    if(v === 'calendar') renderCalendar();
+}
+
+/* ─── TODAY VIEW ─── */
+function renderToday() {
+    const now = new Date();
+    const key = todayKey();
+    const blocks = getBlocks(key);
+    const phase = getPhase(key);
+    const exam = examDates[key];
+
+    let bannerRight = `<span style="color:var(--text-muted);font-size:0.82rem;">${blocks.length} actividad${blocks.length!==1?'es':''}</span>`;
+    if(exam) bannerRight = `<span class="phase-badge exam-day">📝 ${exam}</span>`;
+    else if(phase) bannerRight = `<span class="phase-badge">${phase}</span>`;
+
+    document.getElementById('today-banner').innerHTML =
+        `<span><strong>${dayNames[now.getDay()]}</strong>, ${now.getDate()} de ${monthNames[now.getMonth()]}</span>${bannerRight}`;
+
+    const ticks = document.getElementById('hour-ticks');
+    ticks.innerHTML = '';
+    for(let h = H_START; h <= H_END; h++) {
+        const row = document.createElement('div');
+        row.className = 'hour-row';
+        const lbl = document.createElement('span');
+        lbl.className = 'hour-label';
+        lbl.textContent = h===24 ? '00:00' : `${String(h).padStart(2,'0')}:00`;
+        row.appendChild(lbl);
+        ticks.appendChild(row);
+    }
+
+    const layer = document.getElementById('blocks-layer');
+    layer.innerHTML = '';
+
+    if(blocks.length === 0) {
+        layer.innerHTML = `<div class="empty-state"><span>📋</span>No hay actividades para hoy.<br>Toca <strong>+</strong> para agregar.</div>`;
+    } else {
+        blocks.forEach(bl => {
+            const s = Math.max(H_START, t2d(bl.start));
+            const e = Math.min(H_END, t2d(bl.end));
+            if(e <= s) return;
+            const el = document.createElement('div');
+            el.className = `time-block block-${bl.category}`;
+            el.style.top = `${(s - H_START) * PX_HOUR}px`;
+            el.style.height = `${(e - s) * PX_HOUR}px`;
+            el.innerHTML = `<span class="block-name">${bl.name}</span><span class="block-hours">${bl.start} – ${bl.end}</span>`;
+            el.onclick = () => {
+                if(confirm(`¿Borrar "${bl.name}"?`)) {
+                    const arr = getBlocks(key).filter(x => x.id !== bl.id);
+                    setBlocks(key, arr);
+                    renderToday();
+                }
+            };
+            layer.appendChild(el);
+        });
+    }
+
+    updateNowLine();
+}
+
+function updateNowLine() {
+    const line = document.getElementById('now-line');
+    const now = new Date();
+    const dec = now.getHours() + now.getMinutes()/60;
+    if(dec >= H_START && dec <= H_END) {
+        line.style.display = 'block';
+        line.style.top = `${(dec - H_START) * PX_HOUR}px`;
+    } else { line.style.display = 'none'; }
+}
+
+/* ─── CALENDAR VIEW ─── */
+function renderCalendar() {
+    const grid = document.getElementById('cal-grid');
+    grid.innerHTML = '';
+    const todayStr = todayKey();
+
+    document.getElementById('cal-month-title').textContent = `${monthNames[calMonth]} ${calYear}`;
+
+    ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(d => {
+        const el = document.createElement('div');
+        el.className = 'cal-weekday';
+        el.textContent = d;
+        grid.appendChild(el);
+    });
+
+    const firstDay = new Date(calYear, calMonth, 1);
+    let sw = firstDay.getDay();
+    sw = sw === 0 ? 6 : sw - 1;
+    const dim = new Date(calYear, calMonth+1, 0).getDate();
+    const dpm = new Date(calYear, calMonth, 0).getDate();
+
+    for(let i = sw - 1; i >= 0; i--) {
+        const el = document.createElement('div');
+        el.className = 'cal-day other-month';
+        el.textContent = dpm - i;
+        grid.appendChild(el);
+    }
+
+    for(let d = 1; d <= dim; d++) {
+        const el = document.createElement('div');
+        const key = dateKey(calYear, calMonth, d);
+        el.className = 'cal-day';
+        if(key === todayStr) el.classList.add('today');
+        if(key === calSelectedDate) el.classList.add('selected');
+        if(getBlocks(key).length > 0) el.classList.add('has-events');
+        if(examDates[key]) el.classList.add('has-exam');
+        el.textContent = d;
+        el.onclick = () => { calSelectedDate = key; renderCalendar(); };
+        grid.appendChild(el);
+    }
+
+    const totalCells = sw + dim;
+    const rem = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+    for(let i = 1; i <= rem; i++) {
+        const el = document.createElement('div');
+        el.className = 'cal-day other-month';
+        el.textContent = i;
+        grid.appendChild(el);
+    }
+
+    renderCalSchedule();
+}
+
+function renderCalSchedule() {
+    const ct = document.getElementById('cal-day-schedule');
+    if(!calSelectedDate) {
+        ct.innerHTML = `<p style="text-align:center;color:var(--text-muted);padding:1rem 0;font-size:0.85rem;">Selecciona un día para ver su planificación.</p>`;
+        return;
+    }
+
+    const blocks = getBlocks(calSelectedDate);
+    const dObj = new Date(calSelectedDate + 'T12:00:00');
+    const label = `${dayNames[dObj.getDay()]} ${dObj.getDate()} de ${monthNames[dObj.getMonth()]}`;
+    const phase = getPhase(calSelectedDate);
+    const exam = examDates[calSelectedDate];
+
+    const cmap = { work:'#0284c7', travel:'#d97706', study:'#4f46e5', eat:'#059669', rest:'#db2777', exam:'#dc2626' };
+
+    let html = `<div class="cal-day-schedule-title">Rutina — ${label}</div>`;
+    if(exam) html += `<div style="background:#fef2f2;color:#dc2626;padding:0.5rem 0.8rem;border-radius:6px;font-weight:600;font-size:0.85rem;margin-bottom:0.8rem;">📝 ${exam}</div>`;
+    else if(phase) html += `<div style="background:#eef2ff;color:#4f46e5;padding:0.5rem 0.8rem;border-radius:6px;font-weight:500;font-size:0.82rem;margin-bottom:0.8rem;">${phase}</div>`;
+
+    if(blocks.length === 0) {
+        html += `<p style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem 0;">Sin actividades. Toca <strong>+</strong> para agregar.</p>`;
+    } else {
+        blocks.sort((a,bb) => t2d(a.start) - t2d(bb.start));
+        blocks.forEach(bl => {
+            html += `
+            <div class="cal-event-row" onclick="deleteFromCal('${bl.id}')">
+                <span class="cal-event-time">${bl.start} – ${bl.end}</span>
+                <span class="cal-event-dot" style="background:${cmap[bl.category]||'#aaa'}"></span>
+                <span class="cal-event-name">${bl.name}</span>
+            </div>`;
+        });
+    }
+    ct.innerHTML = html;
+}
+
+function deleteFromCal(id) {
+    if(!calSelectedDate || !confirm('¿Borrar esta actividad?')) return;
+    setBlocks(calSelectedDate, getBlocks(calSelectedDate).filter(x => x.id !== id));
+    renderCalendar();
+}
+
+function changeMonth(dir) {
+    calMonth += dir;
+    if(calMonth < 0) { calMonth = 11; calYear--; }
+    if(calMonth > 11) { calMonth = 0; calYear++; }
+    calSelectedDate = null;
+    renderCalendar();
+}
+
+/* ─── DRAWER ─── */
+function openDrawer()  { document.getElementById('drawer').style.display = 'block'; document.getElementById('overlay').style.display = 'block'; }
+function closeDrawer() { document.getElementById('drawer').style.display = 'none';  document.getElementById('overlay').style.display = 'none'; }
+
+function saveActivity(e) {
+    e.preventDefault();
+    const name = document.getElementById('f-name').value;
+    const cat  = document.getElementById('f-cat').value;
+    const start = document.getElementById('f-start').value;
+    const end   = document.getElementById('f-end').value;
+    if(t2d(start) >= t2d(end)) { alert('La hora de inicio debe ser anterior a la de fin.'); return; }
+    let target = (currentView === 'calendar' && calSelectedDate) ? calSelectedDate : todayKey();
+    const blocks = getBlocks(target);
+    blocks.push({ id: Date.now().toString(), name, category: cat, start, end });
+    setBlocks(target, blocks);
+    closeDrawer();
+    document.getElementById('f-name').value = '';
+    if(currentView === 'today') renderToday(); else renderCalendar();
+}
+
+function clearDay() {
+    if(!confirm('¿Vaciar las actividades de hoy?')) return;
+    setBlocks(todayKey(), []);
+    renderToday();
+}
+
+/* ─── CLOCK ─── */
+function updateClock() {
+    const n = new Date();
+    document.getElementById('clock').textContent = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+    updateNowLine();
+}
+
+/* ─── INIT ─── */
+const today = new Date();
+calYear = today.getFullYear();
+calMonth = today.getMonth();
+calSelectedDate = todayKey();
+updateClock();
+setInterval(updateClock, 15000);
+
+/* Auto-seed on first visit */
+if(!localStorage.getItem('unidev_seeded')) {
+    writeSeedData();
+    localStorage.setItem('unidev_seeded', 'true');
+}
+
+renderToday();
+</script>
+</body>
+</html>
