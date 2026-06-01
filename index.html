@@ -3,1029 +3,871 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Unidev Daily Planner</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Unidev Planner</title>
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f5f5f5;
+            --bg: #f7f7f8;
             --white: #ffffff;
-            --border: #e4e4e7;
+            --border: #e5e5e5;
             --border-light: #f0f0f2;
-            --text-dark: #18181b;
-            --text-mid: #52525b;
-            --text-muted: #a1a1aa;
-            --red-marker: #ef4444;
+            --text-dark: #1a1a1a;
+            --text-mid: #555555;
+            --text-muted: #999999;
+            --accent: #2383e2;
+            --accent-light: #e8f0fe;
+            --red-marker: #eb5757;
 
-            --cat-work: #0284c7;
-            --cat-work-bg: #f0f9ff;
-            --cat-travel: #d97706;
-            --cat-travel-bg: #fffbeb;
-            --cat-study: #4f46e5;
-            --cat-study-bg: #eef2ff;
-            --cat-eat: #059669;
-            --cat-eat-bg: #ecfdf5;
-            --cat-rest: #db2777;
-            --cat-rest-bg: #fdf2f8;
-            --cat-exam: #dc2626;
-            --cat-exam-bg: #fef2f2;
+            --cat-work: #2383e2;
+            --cat-work-bg: #e8f0fe;
+            --cat-travel: #d9730d;
+            --cat-travel-bg: #fdecd3;
+            --cat-study: #6940a5;
+            --cat-study-bg: #ece4f6;
+            --cat-eat: #0f7b6c;
+            --cat-eat-bg: #daf1ee;
+            --cat-rest: #d44c96;
+            --cat-rest-bg: #f8e1ef;
+            --cat-exam: #e03e3e;
+            --cat-exam-bg: #fce4e4;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: 'DIN', 'DIN Alternate', 'Barlow', sans-serif;
-            font-weight: 300;
+            font-family: 'DIN', 'DIN Alternate', 'Barlow', -apple-system, sans-serif;
+            font-weight: 400;
             background: var(--bg);
             color: var(--text-dark);
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             justify-content: center;
-            padding: 0;
         }
 
-        .app {
+        /* ═══════ RESPONSIVE SHELL ═══════ */
+        .shell {
             width: 100%;
-            max-width: 460px;
+            max-width: 1100px;
             min-height: 100vh;
-            background: var(--white);
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
-            border-left: 1px solid var(--border-light);
-            border-right: 1px solid var(--border-light);
+            background: var(--white);
         }
 
-        /* ── TOP BAR ── */
-        .top-bar {
-            padding: 1.2rem 1.4rem 0.8rem;
+        @media (min-width: 768px) {
+            .shell {
+                flex-direction: row;
+                border-left: 1px solid var(--border);
+                border-right: 1px solid var(--border);
+            }
+        }
+
+        /* ═══════ SIDEBAR (Desktop only) ═══════ */
+        .sidebar {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .sidebar {
+                display: flex;
+                flex-direction: column;
+                width: 300px;
+                min-width: 300px;
+                border-right: 1px solid var(--border);
+                background: var(--bg);
+                padding: 1.5rem;
+                gap: 1.5rem;
+                overflow-y: auto;
+            }
+        }
+
+        .sidebar-logo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-dark);
+        }
+
+        .sidebar-logo span {
+            font-weight: 300;
+            color: var(--text-muted);
+        }
+
+        /* ═══════ MAIN CONTENT ═══════ */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ═══════ TOP BAR (Mobile) ═══════ */
+        .mobile-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 1rem 1.2rem 0.6rem;
             border-bottom: 1px solid var(--border);
         }
 
-        .app-title {
-            font-size: 1.3rem;
+        @media (min-width: 768px) {
+            .mobile-top { display: none; }
+        }
+
+        .mobile-title {
+            font-size: 1.2rem;
             font-weight: 600;
-            letter-spacing: -0.5px;
             text-transform: uppercase;
+            letter-spacing: -0.3px;
         }
 
         .clock {
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 500;
             color: var(--text-muted);
-            letter-spacing: 1px;
+            letter-spacing: 0.8px;
         }
 
-        /* ── VIEW TABS ── */
-        .view-tabs {
+        /* ═══════ TABS ═══════ */
+        .tabs {
             display: grid;
             grid-template-columns: 1fr 1fr;
             border-bottom: 1px solid var(--border);
         }
 
-        .view-tab {
-            padding: 0.85rem 0;
+        @media (min-width: 768px) {
+            .tabs { display: none; }
+        }
+
+        .tab {
+            padding: 0.8rem 0;
             text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 500;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
             text-transform: uppercase;
             color: var(--text-muted);
             background: none;
             border: none;
             cursor: pointer;
             position: relative;
-            transition: color 0.25s;
+            transition: color 0.2s;
             font-family: inherit;
         }
 
-        .view-tab.active {
-            color: var(--text-dark);
-            font-weight: 600;
-        }
-
-        .view-tab.active::after {
+        .tab.active { color: var(--text-dark); font-weight: 600; }
+        .tab.active::after {
             content: '';
             position: absolute;
-            bottom: 0;
-            left: 15%;
-            width: 70%;
-            height: 2px;
+            bottom: 0; left: 20%; width: 60%; height: 2px;
             background: var(--text-dark);
             border-radius: 2px;
         }
 
-        /* ── DATE BANNER ── */
-        .date-banner {
-            padding: 0.8rem 1.4rem;
-            font-size: 0.95rem;
-            font-weight: 400;
+        /* ═══════ VIEWS ═══════ */
+        .view {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .view.active { display: flex; }
+
+        @media (min-width: 768px) {
+            .view { display: flex !important; }
+            #view-cal { display: none !important; }
+        }
+
+        /* ═══════ DATE BANNER ═══════ */
+        .banner {
+            padding: 0.75rem 1.2rem;
+            font-size: 0.92rem;
             color: var(--text-mid);
             border-bottom: 1px solid var(--border-light);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-shrink: 0;
         }
 
-        .date-banner strong { font-weight: 600; color: var(--text-dark); }
+        .banner strong { font-weight: 600; color: var(--text-dark); }
 
-        .phase-badge {
-            font-size: 0.7rem;
+        .phase-pill {
+            font-size: 0.68rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 0.25rem 0.6rem;
+            letter-spacing: 0.4px;
+            padding: 0.2rem 0.55rem;
             border-radius: 4px;
-            background: var(--cat-study-bg);
-            color: var(--cat-study);
         }
 
-        .phase-badge.exam-day {
-            background: var(--cat-exam-bg);
-            color: var(--cat-exam);
-            animation: pulse 2s infinite;
+        .phase-pill.study { background: var(--cat-study-bg); color: var(--cat-study); }
+        .phase-pill.exam  { background: var(--cat-exam-bg);  color: var(--cat-exam); animation: blink 2s infinite; }
+
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+        /* ═══════ TIMELINE ═══════ */
+        .timeline-wrap {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 0.5rem 0.8rem 5rem 0;
+            -webkit-overflow-scrolling: touch;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
+        @media (min-width: 768px) {
+            .timeline-wrap { padding: 0.8rem 1.5rem 3rem 0; }
         }
 
-        /* ── VIEW CONTAINERS ── */
-        .view-today, .view-calendar { flex: 1; overflow-y: auto; display: none; flex-direction: column; }
-        .view-today.visible, .view-calendar.visible { display: flex; }
-
-        /* ── TIMELINE ── */
-        .timeline-scroll { flex: 1; overflow-y: auto; padding: 0.5rem 1rem 5rem 0; }
-
-        .timeline {
+        .tl {
             position: relative;
-            margin-left: 58px;
+            margin-left: 56px;
             border-left: 1px solid var(--border);
         }
 
-        .hour-row {
+        @media (min-width: 768px) {
+            .tl { margin-left: 72px; }
+        }
+
+        .tl-row {
             position: relative;
             height: 60px;
             border-bottom: 1px dashed var(--border-light);
         }
 
-        .hour-label {
-            position: absolute;
-            left: -58px;
-            top: -8px;
-            width: 48px;
-            text-align: right;
-            font-size: 0.78rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            letter-spacing: 0.5px;
+        @media (min-width: 768px) {
+            .tl-row { height: 72px; }
         }
 
-        /* ── TIME BLOCKS ── */
-        .time-block {
+        .tl-label {
             position: absolute;
-            left: 12px;
-            right: 12px;
-            border-radius: 8px;
-            padding: 0.55rem 0.85rem;
+            top: -8px;
+            width: 46px;
+            text-align: right;
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.4px;
+            left: -56px;
+        }
+
+        @media (min-width: 768px) {
+            .tl-label { left: -72px; width: 60px; font-size: 0.78rem; }
+        }
+
+        /* ═══════ BLOCKS ═══════ */
+        .blk {
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            border-radius: 6px;
+            padding: 0.45rem 0.7rem;
             display: flex;
             flex-direction: column;
             justify-content: center;
             border-left: 3px solid transparent;
             cursor: pointer;
-            transition: transform 0.15s;
+            transition: transform 0.12s, box-shadow 0.12s;
             z-index: 5;
         }
 
-        .time-block:active { transform: scale(0.97); }
+        .blk:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .blk:active { transform: scale(0.97); }
 
-        .block-name { font-weight: 600; font-size: 0.88rem; letter-spacing: -0.2px; line-height: 1.2; }
-        .block-hours { font-size: 0.72rem; font-weight: 400; margin-top: 2px; }
+        @media (min-width: 768px) {
+            .blk { left: 14px; right: 14px; padding: 0.5rem 0.9rem; border-radius: 8px; }
+        }
 
-        .block-work   { background: var(--cat-work-bg);   border-color: var(--cat-work); }
-        .block-work   .block-name  { color: var(--cat-work); }
-        .block-work   .block-hours { color: rgba(2,132,199,0.65); }
+        .blk-name { font-weight: 600; font-size: 0.84rem; line-height: 1.25; }
+        .blk-time { font-size: 0.7rem; font-weight: 400; margin-top: 1px; }
 
-        .block-travel { background: var(--cat-travel-bg); border-color: var(--cat-travel); }
-        .block-travel .block-name  { color: var(--cat-travel); }
-        .block-travel .block-hours { color: rgba(217,119,6,0.65); }
+        @media (min-width: 768px) {
+            .blk-name { font-size: 0.9rem; }
+            .blk-time { font-size: 0.75rem; }
+        }
 
-        .block-study  { background: var(--cat-study-bg);  border-color: var(--cat-study); }
-        .block-study  .block-name  { color: var(--cat-study); }
-        .block-study  .block-hours { color: rgba(79,70,229,0.65); }
+        .blk-work   { background: var(--cat-work-bg);   border-color: var(--cat-work); }
+        .blk-work   .blk-name { color: var(--cat-work); }
+        .blk-work   .blk-time { color: rgba(35,131,226,0.6); }
+        .blk-travel { background: var(--cat-travel-bg); border-color: var(--cat-travel); }
+        .blk-travel .blk-name { color: var(--cat-travel); }
+        .blk-travel .blk-time { color: rgba(217,115,13,0.6); }
+        .blk-study  { background: var(--cat-study-bg);  border-color: var(--cat-study); }
+        .blk-study  .blk-name { color: var(--cat-study); }
+        .blk-study  .blk-time { color: rgba(105,64,165,0.6); }
+        .blk-eat    { background: var(--cat-eat-bg);    border-color: var(--cat-eat); }
+        .blk-eat    .blk-name { color: var(--cat-eat); }
+        .blk-eat    .blk-time { color: rgba(15,123,108,0.6); }
+        .blk-rest   { background: var(--cat-rest-bg);   border-color: var(--cat-rest); }
+        .blk-rest   .blk-name { color: var(--cat-rest); }
+        .blk-rest   .blk-time { color: rgba(212,76,150,0.6); }
+        .blk-exam   { background: var(--cat-exam-bg);   border-color: var(--cat-exam); }
+        .blk-exam   .blk-name { color: var(--cat-exam); }
+        .blk-exam   .blk-time { color: rgba(224,62,62,0.6); }
 
-        .block-eat    { background: var(--cat-eat-bg);    border-color: var(--cat-eat); }
-        .block-eat    .block-name  { color: var(--cat-eat); }
-        .block-eat    .block-hours { color: rgba(5,150,105,0.65); }
-
-        .block-rest   { background: var(--cat-rest-bg);   border-color: var(--cat-rest); }
-        .block-rest   .block-name  { color: var(--cat-rest); }
-        .block-rest   .block-hours { color: rgba(219,39,119,0.65); }
-
-        .block-exam   { background: var(--cat-exam-bg);   border-color: var(--cat-exam); }
-        .block-exam   .block-name  { color: var(--cat-exam); }
-        .block-exam   .block-hours { color: rgba(220,38,38,0.65); }
-
-        /* ── NOW LINE ── */
-        .now-line {
+        /* ═══════ NOW LINE ═══════ */
+        .now {
             position: absolute;
-            left: -10px;
-            right: 0;
-            height: 1.5px;
+            left: -8px; right: 0;
+            height: 2px;
             background: var(--red-marker);
             z-index: 10;
             pointer-events: none;
         }
 
-        .now-line::before {
+        .now::before {
             content: '';
             position: absolute;
-            left: 0;
-            top: -4px;
-            width: 9px;
-            height: 9px;
+            left: 0; top: -4px;
+            width: 10px; height: 10px;
             border-radius: 50%;
             background: var(--red-marker);
-            box-shadow: 0 0 4px rgba(239,68,68,0.5);
+            box-shadow: 0 0 6px rgba(235,87,87,0.5);
         }
 
-        .empty-state {
+        .empty-msg {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 3rem 1.5rem;
             color: var(--text-muted);
+            font-size: 0.95rem;
         }
 
-        .empty-state span { font-size: 2.5rem; display: block; margin-bottom: 0.8rem; }
+        .empty-msg span { font-size: 2rem; display: block; margin-bottom: 0.6rem; }
 
-        /* ── CALENDAR VIEW ── */
-        .calendar-wrapper { padding: 1rem 1.4rem; }
+        /* ═══════ ACTION STRIP ═══════ */
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .act-btn {
+            flex: 1;
+            padding: 0.5rem;
+            text-align: center;
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 500;
+            color: var(--text-mid);
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .act-btn:hover { background: var(--border-light); }
+        .act-btn.danger { color: var(--red-marker); }
+
+        /* ═══════ CALENDAR (Notion Style) ═══════ */
+        .cal-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            height: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .cal-panel { padding: 0; }
+        }
+
+        /* Mini Month */
+        .mini-cal {
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 768px) {
+            .mini-cal { padding: 1.2rem 1.5rem; }
+        }
 
         .cal-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
         }
 
         .cal-nav-btn {
             background: none;
             border: 1px solid var(--border);
             border-radius: 6px;
-            padding: 0.4rem 0.7rem;
+            padding: 0.35rem 0.65rem;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: var(--text-mid);
-            transition: background 0.2s;
+            transition: background 0.15s;
         }
 
         .cal-nav-btn:hover { background: var(--bg); }
 
-        .cal-month-title { font-size: 1.05rem; font-weight: 600; text-transform: capitalize; }
+        .cal-month-lbl {
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: capitalize;
+            letter-spacing: -0.3px;
+        }
 
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
 
-        .cal-weekday {
+        .cal-wk {
             text-align: center;
-            font-size: 0.72rem;
+            font-size: 0.68rem;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 0.5rem 0;
+            letter-spacing: 0.8px;
+            padding: 0.4rem 0;
         }
 
-        .cal-day {
+        .cal-d {
             aspect-ratio: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 10px;
-            font-size: 0.88rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
             font-weight: 400;
             color: var(--text-mid);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s;
             position: relative;
-            border: 1px solid transparent;
         }
 
-        .cal-day:hover { background: var(--bg); }
-        .cal-day.today { background: var(--text-dark); color: #fff; font-weight: 600; }
-        .cal-day.selected { border-color: var(--text-dark); font-weight: 600; color: var(--text-dark); }
-        .cal-day.today.selected { background: var(--text-dark); color: #fff; }
-        .cal-day.has-events::after { content:''; position:absolute; bottom:4px; width:4px; height:4px; border-radius:50%; background:var(--cat-study); }
-        .cal-day.today.has-events::after { background: #fff; }
-        .cal-day.has-exam::after { background: var(--cat-exam) !important; width: 6px; height: 6px; bottom: 3px; }
-        .cal-day.other-month { color: var(--text-muted); opacity: 0.4; }
+        .cal-d:hover { background: var(--bg); }
+        .cal-d.today { background: var(--text-dark); color: #fff; font-weight: 600; }
+        .cal-d.sel { border: 2px solid var(--accent); font-weight: 600; color: var(--text-dark); }
+        .cal-d.today.sel { background: var(--accent); color: #fff; border-color: var(--accent); }
+        .cal-d.has::after { content:''; position:absolute; bottom:3px; width:4px; height:4px; border-radius:50%; background: var(--cat-study); }
+        .cal-d.today.has::after { background: rgba(255,255,255,0.7); }
+        .cal-d.has-exam::after { background: var(--cat-exam) !important; width:5px; height:5px; }
+        .cal-d.other { color: var(--text-muted); opacity: 0.35; }
 
-        .cal-day-schedule { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-
-        .cal-day-schedule-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-mid);
-            margin-bottom: 0.8rem;
+        /* Day Detail (below mini cal) */
+        .day-detail {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 1rem 1.2rem 5rem;
         }
 
-        .cal-event-row {
+        @media (min-width: 768px) {
+            .day-detail { padding: 1.2rem 1.5rem 3rem; }
+        }
+
+        .dd-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.8rem;
-            padding: 0.6rem 0;
+            margin-bottom: 1rem;
+            padding-bottom: 0.6rem;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .dd-title {
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .dd-count {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .evt {
+            display: flex;
+            align-items: stretch;
+            gap: 0.7rem;
+            padding: 0.55rem 0;
             border-bottom: 1px solid var(--border-light);
             cursor: pointer;
+            transition: background 0.12s;
+            border-radius: 6px;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
         }
 
-        .cal-event-time { font-size: 0.78rem; font-weight: 500; color: var(--text-muted); min-width: 90px; letter-spacing: 0.3px; }
-        .cal-event-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-        .cal-event-name { font-size: 0.9rem; font-weight: 500; }
+        .evt:hover { background: var(--bg); }
 
-        /* ── FAB ── */
+        .evt-stripe {
+            width: 3px;
+            border-radius: 2px;
+            flex-shrink: 0;
+            align-self: stretch;
+        }
+
+        .evt-body { flex: 1; min-width: 0; }
+        .evt-name { font-size: 0.9rem; font-weight: 500; line-height: 1.3; }
+        .evt-time { font-size: 0.75rem; color: var(--text-muted); font-weight: 400; margin-top: 1px; }
+
+        /* ═══════ FAB ═══════ */
         .fab {
             position: fixed;
-            bottom: 1.5rem;
-            right: calc(50% - 205px);
+            bottom: 1.2rem;
+            right: 1.2rem;
             width: 50px;
             height: 50px;
             border-radius: 50%;
             background: var(--text-dark);
             border: none;
             color: #fff;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
             z-index: 80;
-            transition: transform 0.15s;
+            transition: transform 0.12s;
         }
 
         .fab:active { transform: scale(0.88); }
-        @media (max-width: 460px) { .fab { right: 1.2rem; } }
 
-        /* ── DRAWER ── */
-        .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.25); backdrop-filter:blur(2px); z-index:90; }
+        @media (min-width: 768px) {
+            .fab { bottom: 2rem; right: calc(50% - 530px); width: 48px; height: 48px; }
+        }
+
+        /* ═══════ DRAWER ═══════ */
+        .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.2); backdrop-filter:blur(2px); z-index:90; }
 
         .drawer {
             display: none;
             position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 460px;
-            background: var(--white);
-            border-top: 1px solid var(--border);
-            border-radius: 1.2rem 1.2rem 0 0;
-            padding: 1.5rem;
-            box-shadow: 0 -8px 30px rgba(0,0,0,0.08);
             z-index: 100;
-            animation: slideUp 0.25s ease-out;
+            animation: slideUp 0.2s ease-out;
         }
 
-        @keyframes slideUp {
-            from { transform: translate(-50%, 100%); }
-            to   { transform: translate(-50%, 0); }
+        /* Mobile: bottom sheet */
+        @media (max-width: 767px) {
+            .drawer {
+                bottom: 0; left: 0; right: 0;
+                background: var(--white);
+                border-top: 1px solid var(--border);
+                border-radius: 1.2rem 1.2rem 0 0;
+                padding: 1.4rem;
+                box-shadow: 0 -6px 30px rgba(0,0,0,0.08);
+            }
         }
 
-        .drawer-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; }
-        .drawer-head h3 { font-size:1.05rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
-        .drawer-close { background:none; border:none; font-size:1.5rem; color:var(--text-muted); cursor:pointer; }
+        /* Desktop: centered modal */
+        @media (min-width: 768px) {
+            .drawer {
+                top: 50%; left: 50%;
+                transform: translate(-50%, -50%);
+                width: 400px;
+                background: var(--white);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 1.5rem;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+                animation: fadeIn 0.2s ease-out;
+            }
+        }
 
-        .field { margin-bottom: 1rem; }
-        .field label { display:block; font-size:0.72rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:0.35rem; }
-        .field input, .field select { width:100%; padding:0.7rem 0.8rem; font-family:inherit; font-size:0.92rem; font-weight:400; color:var(--text-dark); background:var(--bg); border:1px solid var(--border); border-radius:8px; }
-        .field input:focus, .field select:focus { outline:none; border-color:var(--text-dark); }
-        .field-row { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
+        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        @keyframes fadeIn  { from{opacity:0;transform:translate(-50%,-48%)} to{opacity:1;transform:translate(-50%,-50%)} }
 
-        .btn-save { width:100%; padding:0.85rem; background:var(--text-dark); color:#fff; border:none; border-radius:8px; font-family:inherit; font-size:0.95rem; font-weight:600; letter-spacing:0.5px; cursor:pointer; margin-top:0.4rem; }
+        .dr-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; }
+        .dr-head h3 { font-size:1rem; font-weight:600; letter-spacing:0.3px; }
+        .dr-close { background:none; border:none; font-size:1.4rem; color:var(--text-muted); cursor:pointer; padding:0.2rem; }
+
+        .fld { margin-bottom: 0.9rem; }
+        .fld label { display:block; font-size:0.7rem; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:0.3rem; }
+        .fld input, .fld select { width:100%; padding:0.65rem 0.75rem; font-family:inherit; font-size:0.9rem; font-weight:400; color:var(--text-dark); background:var(--bg); border:1px solid var(--border); border-radius:6px; }
+        .fld input:focus, .fld select:focus { outline:none; border-color:var(--accent); box-shadow: 0 0 0 2px rgba(35,131,226,0.15); }
+        .fld-row { display:grid; grid-template-columns:1fr 1fr; gap:0.7rem; }
+
+        .btn-save { width:100%; padding:0.75rem; background:var(--text-dark); color:#fff; border:none; border-radius:6px; font-family:inherit; font-size:0.9rem; font-weight:600; cursor:pointer; margin-top:0.3rem; }
         .btn-save:active { opacity:0.8; }
-
-        /* ── ACTION STRIP ── */
-        .action-strip { display:flex; gap:0.6rem; padding:0.8rem 1.4rem; border-top:1px solid var(--border); }
-        .action-btn { flex:1; padding:0.55rem; text-align:center; font-family:inherit; font-size:0.8rem; font-weight:500; letter-spacing:0.3px; color:var(--text-mid); background:var(--bg); border:1px solid var(--border); border-radius:8px; cursor:pointer; transition:background 0.2s; }
-        .action-btn:hover { background:var(--border-light); }
-        .action-btn.danger { color:var(--red-marker); }
     </style>
 </head>
 <body>
 
-<div class="app">
-    <div class="top-bar">
-        <div class="app-title">Planificador</div>
-        <div class="clock" id="clock">--:--</div>
-    </div>
+<div class="shell">
 
-    <div class="view-tabs">
-        <button class="view-tab active" id="tab-today" onclick="showView('today')">Rutina Hoy</button>
-        <button class="view-tab" id="tab-calendar" onclick="showView('calendar')">Calendario</button>
-    </div>
+    <!-- ═══ SIDEBAR (Desktop) ═══ -->
+    <aside class="sidebar" id="sidebar">
+        <div>
+            <div class="sidebar-logo">Unidev <span>Planner</span></div>
+        </div>
+        <!-- Mini Calendar lives here on desktop -->
+        <div id="sidebar-cal"></div>
+        <!-- Day detail lives here on desktop -->
+        <div id="sidebar-detail" style="flex:1;overflow-y:auto;"></div>
+    </aside>
 
-    <!-- TODAY VIEW -->
-    <div class="view-today visible" id="view-today">
-        <div class="date-banner" id="today-banner"></div>
-        <div class="timeline-scroll" id="timeline-scroll">
-            <div class="timeline" id="timeline">
-                <div class="now-line" id="now-line"></div>
-                <div id="hour-ticks"></div>
-                <div id="blocks-layer"></div>
+    <!-- ═══ MAIN ═══ -->
+    <div class="main">
+
+        <div class="mobile-top">
+            <div class="mobile-title">Planner</div>
+            <div class="clock" id="clock">--:--</div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" id="tab-today" onclick="switchTab('today')">Rutina Hoy</button>
+            <button class="tab" id="tab-cal" onclick="switchTab('cal')">Calendario</button>
+        </div>
+
+        <!-- TODAY VIEW -->
+        <div class="view active" id="view-today">
+            <div class="banner" id="today-banner"></div>
+            <div class="timeline-wrap" id="tl-scroll">
+                <div class="tl" id="tl">
+                    <div class="now" id="now-line"></div>
+                    <div id="tl-ticks"></div>
+                    <div id="tl-blocks"></div>
+                </div>
+            </div>
+            <div class="actions">
+                <button class="act-btn" onclick="seedAll()">Recargar Rutina</button>
+                <button class="act-btn danger" onclick="clearToday()">Vaciar Día</button>
             </div>
         </div>
-        <div class="action-strip">
-            <button class="action-btn" onclick="seedAllData()">Recargar Rutina</button>
-            <button class="action-btn danger" onclick="clearDay()">Vaciar Día</button>
-        </div>
-    </div>
 
-    <!-- CALENDAR VIEW -->
-    <div class="view-calendar" id="view-calendar">
-        <div class="calendar-wrapper">
-            <div class="cal-nav">
-                <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
-                <span class="cal-month-title" id="cal-month-title"></span>
-                <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+        <!-- CALENDAR VIEW (Mobile only; Desktop uses sidebar) -->
+        <div class="view" id="view-cal">
+            <div class="cal-panel">
+                <div class="mini-cal" id="mob-mini-cal"></div>
+                <div class="day-detail" id="mob-day-detail"></div>
             </div>
-            <div class="cal-grid" id="cal-grid"></div>
-            <div class="cal-day-schedule" id="cal-day-schedule"></div>
         </div>
+
     </div>
 </div>
 
-<button class="fab" onclick="openDrawer()">+</button>
-<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
-
+<button class="fab" onclick="openDr()">+</button>
+<div class="overlay" id="overlay" onclick="closeDr()"></div>
 <div class="drawer" id="drawer">
-    <div class="drawer-head">
+    <div class="dr-head">
         <h3>Nueva Actividad</h3>
-        <button class="drawer-close" onclick="closeDrawer()">×</button>
+        <button class="dr-close" onclick="closeDr()">×</button>
     </div>
-    <form id="act-form" onsubmit="saveActivity(event)">
-        <div class="field">
-            <label>Nombre</label>
-            <input type="text" id="f-name" placeholder="Ej: Clase de Física" required>
-        </div>
-        <div class="field">
-            <label>Categoría</label>
+    <form id="frm" onsubmit="saveAct(event)">
+        <div class="fld"><label>Nombre</label><input type="text" id="f-name" placeholder="Ej: Clase de Física" required></div>
+        <div class="fld"><label>Categoría</label>
             <select id="f-cat" required>
                 <option value="work">💼  Trabajo</option>
-                <option value="travel">🚗  Viaje / Desplazamiento</option>
+                <option value="travel">🚗  Viaje</option>
                 <option value="study">📚  Estudio</option>
-                <option value="eat">🍽️  Almuerzo / Cena</option>
-                <option value="rest">😴  Descanso / Ocio</option>
-                <option value="exam">📝  Examen / Parcial</option>
+                <option value="eat">🍽️  Comer</option>
+                <option value="rest">😴  Descanso</option>
+                <option value="exam">📝  Examen</option>
             </select>
         </div>
-        <div class="field">
-            <div class="field-row">
-                <div><label>Inicio</label><input type="time" id="f-start" required></div>
-                <div><label>Fin</label><input type="time" id="f-end" required></div>
-            </div>
-        </div>
-        <button type="submit" class="btn-save">Guardar Actividad</button>
+        <div class="fld"><div class="fld-row">
+            <div><label>Inicio</label><input type="time" id="f-start" required></div>
+            <div><label>Fin</label><input type="time" id="f-end" required></div>
+        </div></div>
+        <button type="submit" class="btn-save">Guardar</button>
     </form>
 </div>
 
 <script>
 /* ─── CONFIG ─── */
-const H_START = 8, H_END = 24, PX_HOUR = 60;
+const HS=8, HE=24;
+let PX_H=60;
+function recalcPx(){PX_H=window.innerWidth>=768?72:60;}
+recalcPx(); window.addEventListener('resize',()=>{recalcPx();renderToday();renderCal();});
 
 /* ─── STATE ─── */
-let currentView = 'today';
-let calYear, calMonth, calSelectedDate = null;
+let curTab='today', calY, calM, calSel=null;
+const DN=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const exams={'2026-06-16':'Parcial Prob y Est','2026-06-19':'Parcial Único Física 1','2026-07-01':'Parcial Costos Ind.'};
 
-const dayNames  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+function tk(){const d=new Date();return `${d.getFullYear()}-${S(d.getMonth()+1)}-${S(d.getDate())}`;}
+function dk(y,m,d){return `${y}-${S(m+1)}-${S(d)}`;}
+function S(n){return String(n).padStart(2,'0');}
+function sk(d){return `unidev_plan_${d}`;}
+function gb(d){return JSON.parse(localStorage.getItem(sk(d))||'[]');}
+function sb(d,a){localStorage.setItem(sk(d),JSON.stringify(a));}
+function t2d(t){const[h,m]=t.split(':').map(Number);return h+m/60;}
+function phase(d){if(d>='2026-06-01'&&d<='2026-06-19')return{t:'Fase 1 · Prob&Est + Física',c:'study'};if(d>='2026-06-20'&&d<='2026-07-01')return{t:'Fase 2 · Costos',c:'study'};return null;}
+const cmap={work:'#2383e2',travel:'#d9730d',study:'#6940a5',eat:'#0f7b6c',rest:'#d44c96',exam:'#e03e3e'};
 
-/* Exam dates for badge detection */
-const examDates = {
-    '2026-06-16': 'Parcial Prob y Est',
-    '2026-06-19': 'Parcial Único Física 1',
-    '2026-07-01': 'Parcial Costos Ind.'
-};
-
-function todayKey() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+/* ─── TABS ─── */
+function switchTab(v){
+    curTab=v;
+    document.getElementById('tab-today').classList.toggle('active',v==='today');
+    document.getElementById('tab-cal').classList.toggle('active',v==='cal');
+    document.getElementById('view-today').classList.toggle('active',v==='today');
+    document.getElementById('view-cal').classList.toggle('active',v==='cal');
+    if(v==='today')renderToday();else renderCal();
 }
 
-function dateKey(y,m,d) {
-    return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+/* ─── TODAY ─── */
+function renderToday(){
+    const now=new Date(),key=tk(),bl=gb(key),ph=phase(key),ex=exams[key];
+    let badge='';
+    if(ex)badge=`<span class="phase-pill exam">📝 ${ex}</span>`;
+    else if(ph)badge=`<span class="phase-pill ${ph.c}">${ph.t}</span>`;
+    else badge=`<span style="font-size:0.8rem;color:var(--text-muted)">${bl.length} actividad${bl.length!==1?'es':''}</span>`;
+    document.getElementById('today-banner').innerHTML=`<span><strong>${DN[now.getDay()]}</strong>, ${now.getDate()} de ${MN[now.getMonth()]}</span>${badge}`;
+
+    const ticks=document.getElementById('tl-ticks');ticks.innerHTML='';
+    for(let h=HS;h<=HE;h++){const r=document.createElement('div');r.className='tl-row';const l=document.createElement('span');l.className='tl-label';l.textContent=h===24?'00:00':`${S(h)}:00`;r.appendChild(l);ticks.appendChild(r);}
+
+    const layer=document.getElementById('tl-blocks');layer.innerHTML='';
+    if(!bl.length){layer.innerHTML='<div class="empty-msg"><span>📋</span>Sin actividades hoy.<br>Toca <b>+</b> para agregar.</div>';
+    }else{bl.forEach(b=>{
+        const s=Math.max(HS,t2d(b.start)),e=Math.min(HE,t2d(b.end));if(e<=s)return;
+        const el=document.createElement('div');el.className=`blk blk-${b.category}`;
+        el.style.top=`${(s-HS)*PX_H}px`;el.style.height=`${(e-s)*PX_H}px`;
+        el.innerHTML=`<span class="blk-name">${b.name}</span><span class="blk-time">${b.start} – ${b.end}</span>`;
+        el.onclick=()=>{if(confirm(`¿Borrar "${b.name}"?`)){sb(key,gb(key).filter(x=>x.id!==b.id));renderToday();}};
+        layer.appendChild(el);
+    });}
+    updateNow();
 }
 
-function sk(dateStr) { return `unidev_plan_${dateStr}`; }
-function getBlocks(ds) { return JSON.parse(localStorage.getItem(sk(ds)) || '[]'); }
-function setBlocks(ds, arr) { localStorage.setItem(sk(ds), JSON.stringify(arr)); }
-function t2d(t) { const [h,m] = t.split(':').map(Number); return h + m/60; }
-
-function getPhase(dateStr) {
-    if(dateStr >= '2026-06-01' && dateStr <= '2026-06-19') return '📅 Fase 1 · Prob&Est + Física';
-    if(dateStr >= '2026-06-20' && dateStr <= '2026-07-01') return '📅 Fase 2 · Costos Industriales';
-    return null;
+function updateNow(){
+    const l=document.getElementById('now-line'),n=new Date(),d=n.getHours()+n.getMinutes()/60;
+    if(d>=HS&&d<=HE){l.style.display='block';l.style.top=`${(d-HS)*PX_H}px`;}else{l.style.display='none';}
 }
 
-/* ─── COMPLETE ROUTINE DATA SEED ─── */
-function seedAllData() {
-    if(!confirm('¿Cargar toda la rutina planificada (Fase 1 y Fase 2)? Esto sobreescribirá los datos existentes.')) return;
-    writeSeedData();
-    if(currentView === 'today') renderToday();
-    else renderCalendar();
+/* ─── CALENDAR ─── */
+function renderCal(){
+    const isDesktop=window.innerWidth>=768;
+    const calContainer=isDesktop?document.getElementById('sidebar-cal'):document.getElementById('mob-mini-cal');
+    const detailContainer=isDesktop?document.getElementById('sidebar-detail'):document.getElementById('mob-day-detail');
+
+    calContainer.innerHTML=buildMiniCal();
+    detailContainer.innerHTML=buildDayDetail();
 }
 
-function writeSeedData() {
-    let id = 1;
-    function b(name, cat, start, end) { return { id: String(id++), name, category: cat, start, end }; }
-
-    /* Helper blocks */
-    const TRABAJO    = () => b('Trabajo','work','10:00','16:00');
-    const VIAJE      = () => b('Viaje y despeje','travel','16:00','17:00');
-    const CENA_L     = () => b('Cocinar y cenar','eat','20:00','22:00');
-    const CENA_N     = () => b('Cocinar y cenar','eat','22:00','24:00');
-    const OCIO_TARDE = () => b('Tiempo de ocio libre','rest','16:00','24:00');
-
-    /* ═══ Mayo 31 (Dom - Hoy) ═══ */
-    setBlocks('2026-05-31', [
-        b('CS50: Introduction to CS','study','10:00','13:00'),
-        b('Repaso Facultad','study','13:00','16:00'),
-        OCIO_TARDE()
-    ]);
-
-    /* ═══ FASE 1: Junio 1 – 19 ═══ */
-
-    /* Jun 1 (Lun) */
-    setBlocks('2026-06-01', [
-        TRABAJO(), VIAJE(),
-        b('Física 1 – Práctica y ejercicios','study','17:00','20:00'),
-        CENA_L(),
-        b('Prob y Est – Repaso conceptual','study','22:00','24:00')
-    ]);
-
-    /* Jun 2 (Mar) */
-    setBlocks('2026-06-02', [
-        TRABAJO(), VIAJE(),
-        b('Repaso previo: Prob y Estadística','study','17:00','19:00'),
-        b('Cursada: Probabilidad y Estadística','study','19:00','22:00'),
-        CENA_N()
-    ]);
-
-    /* Jun 3 (Mié) */
-    setBlocks('2026-06-03', [
-        TRABAJO(), VIAJE(),
-        b('Repaso previo: Costos Industriales','study','17:00','19:00'),
-        b('Cursada: Costos Industriales','study','19:00','22:00'),
-        CENA_N()
-    ]);
-
-    /* Jun 4 (Jue) */
-    setBlocks('2026-06-04', [
-        TRABAJO(), VIAJE(),
-        b('Prob y Est – Parciales viejos','study','17:00','20:00'),
-        CENA_L(),
-        b('Física 1 – Repaso del día','study','22:00','24:00')
-    ]);
-
-    /* Jun 5 (Vie) */
-    setBlocks('2026-06-05', [
-        TRABAJO(), VIAJE(),
-        b('Repaso previo: Física 1','study','17:00','19:00'),
-        b('Cursada: Física 1','study','19:00','22:00'),
-        CENA_N()
-    ]);
-
-    /* Jun 6 (Sáb) */
-    setBlocks('2026-06-06', [
-        b('Física 1 – Estudio fuerte','study','10:00','13:00'),
-        b('Prob y Est – Estudio fuerte','study','13:00','16:00'),
-        OCIO_TARDE()
-    ]);
-
-    /* Jun 7 (Dom) */
-    setBlocks('2026-06-07', [
-        b('CS50: Introduction to CS','study','10:00','13:00'),
-        b('Física 1 – Repaso','study','13:00','14:30'),
-        b('Prob y Est – Repaso','study','14:30','16:00'),
-        OCIO_TARDE()
-    ]);
-
-    /* Jun 8 (Lun) – mirror Jun 1 */
-    setBlocks('2026-06-08', [
-        TRABAJO(), VIAJE(),
-        b('Física 1 – Práctica y ejercicios','study','17:00','20:00'),
-        CENA_L(),
-        b('Prob y Est – Repaso conceptual','study','22:00','24:00')
-    ]);
-
-    /* Jun 9 (Mar) */
-    setBlocks('2026-06-09', [
-        TRABAJO(), VIAJE(),
-        b('Repaso previo: Prob y Estadística','study','17:00','19:00'),
-        b('Cursada: Probabilidad y Estadística','study','19:00','22:00'),
-        CENA_N()
-    ]);
-
-    /* Jun 10 (Mié) */
-    setBlocks('2026-06-10', [
-        TRABAJO(), VIAJE(),
-        b('Repaso previo: Costos Industriales','study','17:00','19:00'),
-        b('Cursada: Costos Industriales','study','19:00','22:00'),
-        CENA_N()
-    ]);
-
-    /* Jun 11 (Jue) */
-    setBlocks('2026-06-11', [
-        TRABAJO(), VIAJE(),
-        b('Prob y Est – Parciales viejos','study','17:00','20:00'),
-        CENA_L(),
-        b('Física 1 – Repaso del día','study','22:00','24:00')
-    ]);
-
-    /* Jun 12 (Vie) */
-    setBlocks('2026-06-12', [
-        TRABAJO(), VIAJE(),
-        b('Repaso previo: Física 1','study','17:00','19:00'),
-        b('Cursada: Física 1','study','19:00','22:00'),
-        CENA_N()
-    ]);
-
-    /* Jun 13 (Sáb) */
-    setBlocks('2026-06-13', [
-        b('Física 1 – Estudio fuerte','study','10:00','13:00'),
-        b('Prob y Est – Estudio fuerte','study','13:00','16:00'),
-        OCIO_TARDE()
-    ]);
-
-    /* Jun 14 (Dom) */
-    setBlocks('2026-06-14', [
-        b('CS50: Introduction to CS','study','10:00','13:00'),
-        b('Física 1 – Repaso','study','13:00','14:30'),
-        b('Prob y Est – Repaso','study','14:30','16:00'),
-        OCIO_TARDE()
-    ]);
-
-    /* 🔥 Jun 15 (Lun) – DÍA PREVIO A PARCIAL PROB */
-    setBlocks('2026-06-15', [
-        TRABAJO(), VIAJE(),
-        b('🔥 Prob y Est – Repaso INTENSIVO','study','17:00','20:00'),
-        CENA_L(),
-        b('🔥 Prob y Est – Repaso FINAL','study','22:00','24:00')
-    ]);
-
-    /* 📝 Jun 16 (Mar) – PARCIAL PROB Y EST */
-    setBlocks('2026-06-16', [
-        TRABAJO(), VIAJE(),
-        b('Repaso último momento Prob y Est','study','17:00','19:00'),
-        b('📝 PARCIAL: Probabilidad y Estadística','exam','19:00','22:00'),
-        CENA_N()
-    ]);
-
-    /* Jun 17 (Mié) */
-    setBlocks('2026-06-17', [
-        TRABAJO(), VIAJE(),
-        b('Física 1 – Repaso intensivo','study','17:00','19:00'),
-        b('Cursada: Costos Industriales','study','19:00','22:00'),
-        CENA_N()
-    ]);
-
-    /* 🔥 Jun 18 (Jue) – DÍA PREVIO A PARCIAL FÍSICA */
-    setBlocks('2026-06-18', [
-        TRABAJO(), VIAJE(),
-        b('🔥 Física 1 – Repaso INTENSIVO','study','17:00','20:00'),
-        CENA_L(),
-        b('🔥 Física 1 – Repaso FINAL','study','22:00','24:00')
-    ]);
-
-    /* 📝 Jun 19 (Vie) – PARCIAL ÚNICO FÍSICA 1 */
-    setBlocks('2026-06-19', [
-        TRABAJO(), VIAJE(),
-        b('Repaso último momento Física 1','study','17:00','19:00'),
-        b('📝 PARCIAL ÚNICO: Física 1','exam','19:00','22:00'),
-        CENA_N()
-    ]);
-
-    /* ═══ FASE 2: Junio 20 – Julio 1 ═══ */
-
-    /* Jun 20 (Sáb) */
-    setBlocks('2026-06-20', [
-        b('Costos Industriales – Inicio fase intensiva','study','10:00','16:00'),
-        OCIO_TARDE()
-    ]);
-
-    /* Jun 21 (Dom) */
-    setBlocks('2026-06-21', [
-        b('CS50: Introduction to CS','study','10:00','13:00'),
-        b('Costos Industriales – Teoría','study','13:00','16:00'),
-        OCIO_TARDE()
-    ]);
-
-    /* Jun 22 (Lun) */
-    setBlocks('2026-06-22', [
-        TRABAJO(), VIAJE(),
-        b('Costos Industriales – Ejercicios','study','17:00','20:00'),
-        CENA_L(),
-        b('Costos Industriales – Teoría','study','22:00','24:00')
-    ]);
-
-    /* Jun 23 (Mar) */
-    setBlocks('2026-06-23', [
-        TRABAJO(), VIAJE(),
-        b('Costos Industriales – Repaso','study','17:00','19:00'),
-        b('Cursada: Probabilidad y Estadística','study','19:00','22:00'),
-        CENA_N()
-    ]);
-
-    /* Jun 24 (Mié) */
-    setBlocks('2026-06-24', [
-        TRABAJO(), VIAJE(),
-        b('Costos Industriales – Repaso previo','study','17:00','19:00'),
-        b('Cursada: Costos Industriales','study','19:00','22:00'),
-        CENA_N()
-    ]);
-
-    /* Jun 25 (Jue) */
-    setBlocks('2026-06-25', [
-        TRABAJO(), VIAJE(),
-        b('Costos Industriales – Ejercicios','study','17:00','20:00'),
-        CENA_L(),
-        b('Costos Industriales – Presupuestos','study','22:00','24:00')
-    ]);
-
-    /* Jun 26 (Vie) */
-    setBlocks('2026-06-26', [
-        TRABAJO(), VIAJE(),
-        b('Costos Industriales – Repaso','study','17:00','19:00'),
-        b('Cursada: Física 1','study','19:00','22:00'),
-        CENA_N()
-    ]);
-
-    /* Jun 27 (Sáb) – Simulacro */
-    setBlocks('2026-06-27', [
-        b('Costos Industriales – Simulacro de examen','study','10:00','16:00'),
-        OCIO_TARDE()
-    ]);
-
-    /* Jun 28 (Dom) – Simulacro */
-    setBlocks('2026-06-28', [
-        b('CS50: Introduction to CS','study','10:00','13:00'),
-        b('Costos Industriales – Simulacro de examen','study','13:00','16:00'),
-        OCIO_TARDE()
-    ]);
-
-    /* Jun 29 (Lun) */
-    setBlocks('2026-06-29', [
-        TRABAJO(), VIAJE(),
-        b('Costos Industriales – Repaso intensivo','study','17:00','20:00'),
-        CENA_L(),
-        b('Costos Industriales – Repaso final','study','22:00','24:00')
-    ]);
-
-    /* 🔥 Jun 30 (Mar) – DÍA PREVIO PARCIAL COSTOS */
-    setBlocks('2026-06-30', [
-        TRABAJO(), VIAJE(),
-        b('🔥 Costos Industriales – Repaso FINAL','study','17:00','19:00'),
-        b('Cursada: Probabilidad y Estadística','study','19:00','22:00'),
-        b('🔥 Costos – Último repaso','study','22:00','24:00')
-    ]);
-
-    /* 📝 Jul 1 (Mié) – PARCIAL COSTOS INDUSTRIALES */
-    setBlocks('2026-07-01', [
-        TRABAJO(), VIAJE(),
-        b('Repaso último momento Costos','study','17:00','19:00'),
-        b('📝 PARCIAL: Costos Industriales','exam','19:00','22:00'),
-        CENA_N()
-    ]);
-}
-
-/* ─── VIEW SWITCHING ─── */
-function showView(v) {
-    currentView = v;
-    document.getElementById('tab-today').classList.toggle('active', v==='today');
-    document.getElementById('tab-calendar').classList.toggle('active', v==='calendar');
-    document.getElementById('view-today').classList.toggle('visible', v==='today');
-    document.getElementById('view-calendar').classList.toggle('visible', v==='calendar');
-    if(v === 'today') renderToday();
-    if(v === 'calendar') renderCalendar();
-}
-
-/* ─── TODAY VIEW ─── */
-function renderToday() {
-    const now = new Date();
-    const key = todayKey();
-    const blocks = getBlocks(key);
-    const phase = getPhase(key);
-    const exam = examDates[key];
-
-    let bannerRight = `<span style="color:var(--text-muted);font-size:0.82rem;">${blocks.length} actividad${blocks.length!==1?'es':''}</span>`;
-    if(exam) bannerRight = `<span class="phase-badge exam-day">📝 ${exam}</span>`;
-    else if(phase) bannerRight = `<span class="phase-badge">${phase}</span>`;
-
-    document.getElementById('today-banner').innerHTML =
-        `<span><strong>${dayNames[now.getDay()]}</strong>, ${now.getDate()} de ${monthNames[now.getMonth()]}</span>${bannerRight}`;
-
-    const ticks = document.getElementById('hour-ticks');
-    ticks.innerHTML = '';
-    for(let h = H_START; h <= H_END; h++) {
-        const row = document.createElement('div');
-        row.className = 'hour-row';
-        const lbl = document.createElement('span');
-        lbl.className = 'hour-label';
-        lbl.textContent = h===24 ? '00:00' : `${String(h).padStart(2,'0')}:00`;
-        row.appendChild(lbl);
-        ticks.appendChild(row);
+function buildMiniCal(){
+    const todayStr=tk();
+    let h=`<div class="cal-nav"><button class="cal-nav-btn" onclick="chgM(-1)">‹</button><span class="cal-month-lbl">${MN[calM]} ${calY}</span><button class="cal-nav-btn" onclick="chgM(1)">›</button></div>`;
+    h+='<div class="cal-grid">';
+    ['L','M','M','J','V','S','D'].forEach(d=>{h+=`<div class="cal-wk">${d}</div>`;});
+    const fd=new Date(calY,calM,1);let sw=fd.getDay();sw=sw===0?6:sw-1;
+    const dim=new Date(calY,calM+1,0).getDate();
+    const dpm=new Date(calY,calM,0).getDate();
+    for(let i=sw-1;i>=0;i--)h+=`<div class="cal-d other">${dpm-i}</div>`;
+    for(let d=1;d<=dim;d++){
+        const k=dk(calY,calM,d);let cls='cal-d';
+        if(k===todayStr)cls+=' today';if(k===calSel)cls+=' sel';
+        if(gb(k).length)cls+=' has';if(exams[k])cls+=' has-exam';
+        h+=`<div class="${cls}" onclick="selDay('${k}')">${d}</div>`;
     }
-
-    const layer = document.getElementById('blocks-layer');
-    layer.innerHTML = '';
-
-    if(blocks.length === 0) {
-        layer.innerHTML = `<div class="empty-state"><span>📋</span>No hay actividades para hoy.<br>Toca <strong>+</strong> para agregar.</div>`;
-    } else {
-        blocks.forEach(bl => {
-            const s = Math.max(H_START, t2d(bl.start));
-            const e = Math.min(H_END, t2d(bl.end));
-            if(e <= s) return;
-            const el = document.createElement('div');
-            el.className = `time-block block-${bl.category}`;
-            el.style.top = `${(s - H_START) * PX_HOUR}px`;
-            el.style.height = `${(e - s) * PX_HOUR}px`;
-            el.innerHTML = `<span class="block-name">${bl.name}</span><span class="block-hours">${bl.start} – ${bl.end}</span>`;
-            el.onclick = () => {
-                if(confirm(`¿Borrar "${bl.name}"?`)) {
-                    const arr = getBlocks(key).filter(x => x.id !== bl.id);
-                    setBlocks(key, arr);
-                    renderToday();
-                }
-            };
-            layer.appendChild(el);
-        });
-    }
-
-    updateNowLine();
+    const tc=sw+dim;const rem=tc%7===0?0:7-tc%7;
+    for(let i=1;i<=rem;i++)h+=`<div class="cal-d other">${i}</div>`;
+    h+='</div>';
+    return h;
 }
 
-function updateNowLine() {
-    const line = document.getElementById('now-line');
-    const now = new Date();
-    const dec = now.getHours() + now.getMinutes()/60;
-    if(dec >= H_START && dec <= H_END) {
-        line.style.display = 'block';
-        line.style.top = `${(dec - H_START) * PX_HOUR}px`;
-    } else { line.style.display = 'none'; }
+function buildDayDetail(){
+    if(!calSel)return '<div class="empty-msg" style="padding:2rem 0">Selecciona un día del calendario.</div>';
+    const bl=gb(calSel),dObj=new Date(calSel+'T12:00:00');
+    const label=`${DN[dObj.getDay()]} ${dObj.getDate()} de ${MN[dObj.getMonth()]}`;
+    const ex=exams[calSel],ph=phase(calSel);
+    let h=`<div class="dd-header"><div class="dd-title">${label}</div><div class="dd-count">${bl.length} actividad${bl.length!==1?'es':''}</div></div>`;
+    if(ex)h+=`<div style="background:var(--cat-exam-bg);color:var(--cat-exam);padding:0.45rem 0.7rem;border-radius:6px;font-weight:600;font-size:0.82rem;margin-bottom:0.8rem;">📝 ${ex}</div>`;
+    else if(ph)h+=`<div style="background:var(--cat-study-bg);color:var(--cat-study);padding:0.45rem 0.7rem;border-radius:6px;font-weight:500;font-size:0.8rem;margin-bottom:0.8rem;">${ph.t}</div>`;
+    if(!bl.length){h+='<div class="empty-msg" style="padding:1.5rem 0"><span>📋</span>Sin actividades.<br>Toca <b>+</b> para agregar.</div>';}
+    else{bl.sort((a,b)=>t2d(a.start)-t2d(b.start));bl.forEach(b=>{
+        h+=`<div class="evt" onclick="delCal('${b.id}')"><div class="evt-stripe" style="background:${cmap[b.category]||'#aaa'}"></div><div class="evt-body"><div class="evt-name">${b.name}</div><div class="evt-time">${b.start} – ${b.end}</div></div></div>`;
+    });}
+    return h;
 }
 
-/* ─── CALENDAR VIEW ─── */
-function renderCalendar() {
-    const grid = document.getElementById('cal-grid');
-    grid.innerHTML = '';
-    const todayStr = todayKey();
-
-    document.getElementById('cal-month-title').textContent = `${monthNames[calMonth]} ${calYear}`;
-
-    ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(d => {
-        const el = document.createElement('div');
-        el.className = 'cal-weekday';
-        el.textContent = d;
-        grid.appendChild(el);
-    });
-
-    const firstDay = new Date(calYear, calMonth, 1);
-    let sw = firstDay.getDay();
-    sw = sw === 0 ? 6 : sw - 1;
-    const dim = new Date(calYear, calMonth+1, 0).getDate();
-    const dpm = new Date(calYear, calMonth, 0).getDate();
-
-    for(let i = sw - 1; i >= 0; i--) {
-        const el = document.createElement('div');
-        el.className = 'cal-day other-month';
-        el.textContent = dpm - i;
-        grid.appendChild(el);
-    }
-
-    for(let d = 1; d <= dim; d++) {
-        const el = document.createElement('div');
-        const key = dateKey(calYear, calMonth, d);
-        el.className = 'cal-day';
-        if(key === todayStr) el.classList.add('today');
-        if(key === calSelectedDate) el.classList.add('selected');
-        if(getBlocks(key).length > 0) el.classList.add('has-events');
-        if(examDates[key]) el.classList.add('has-exam');
-        el.textContent = d;
-        el.onclick = () => { calSelectedDate = key; renderCalendar(); };
-        grid.appendChild(el);
-    }
-
-    const totalCells = sw + dim;
-    const rem = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-    for(let i = 1; i <= rem; i++) {
-        const el = document.createElement('div');
-        el.className = 'cal-day other-month';
-        el.textContent = i;
-        grid.appendChild(el);
-    }
-
-    renderCalSchedule();
-}
-
-function renderCalSchedule() {
-    const ct = document.getElementById('cal-day-schedule');
-    if(!calSelectedDate) {
-        ct.innerHTML = `<p style="text-align:center;color:var(--text-muted);padding:1rem 0;font-size:0.85rem;">Selecciona un día para ver su planificación.</p>`;
-        return;
-    }
-
-    const blocks = getBlocks(calSelectedDate);
-    const dObj = new Date(calSelectedDate + 'T12:00:00');
-    const label = `${dayNames[dObj.getDay()]} ${dObj.getDate()} de ${monthNames[dObj.getMonth()]}`;
-    const phase = getPhase(calSelectedDate);
-    const exam = examDates[calSelectedDate];
-
-    const cmap = { work:'#0284c7', travel:'#d97706', study:'#4f46e5', eat:'#059669', rest:'#db2777', exam:'#dc2626' };
-
-    let html = `<div class="cal-day-schedule-title">Rutina — ${label}</div>`;
-    if(exam) html += `<div style="background:#fef2f2;color:#dc2626;padding:0.5rem 0.8rem;border-radius:6px;font-weight:600;font-size:0.85rem;margin-bottom:0.8rem;">📝 ${exam}</div>`;
-    else if(phase) html += `<div style="background:#eef2ff;color:#4f46e5;padding:0.5rem 0.8rem;border-radius:6px;font-weight:500;font-size:0.82rem;margin-bottom:0.8rem;">${phase}</div>`;
-
-    if(blocks.length === 0) {
-        html += `<p style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem 0;">Sin actividades. Toca <strong>+</strong> para agregar.</p>`;
-    } else {
-        blocks.sort((a,bb) => t2d(a.start) - t2d(bb.start));
-        blocks.forEach(bl => {
-            html += `
-            <div class="cal-event-row" onclick="deleteFromCal('${bl.id}')">
-                <span class="cal-event-time">${bl.start} – ${bl.end}</span>
-                <span class="cal-event-dot" style="background:${cmap[bl.category]||'#aaa'}"></span>
-                <span class="cal-event-name">${bl.name}</span>
-            </div>`;
-        });
-    }
-    ct.innerHTML = html;
-}
-
-function deleteFromCal(id) {
-    if(!calSelectedDate || !confirm('¿Borrar esta actividad?')) return;
-    setBlocks(calSelectedDate, getBlocks(calSelectedDate).filter(x => x.id !== id));
-    renderCalendar();
-}
-
-function changeMonth(dir) {
-    calMonth += dir;
-    if(calMonth < 0) { calMonth = 11; calYear--; }
-    if(calMonth > 11) { calMonth = 0; calYear++; }
-    calSelectedDate = null;
-    renderCalendar();
-}
+function selDay(k){calSel=k;renderCal();}
+function delCal(id){if(!calSel||!confirm('¿Borrar esta actividad?'))return;sb(calSel,gb(calSel).filter(x=>x.id!==id));renderCal();}
+function chgM(dir){calM+=dir;if(calM<0){calM=11;calY--;}if(calM>11){calM=0;calY++;}calSel=null;renderCal();}
 
 /* ─── DRAWER ─── */
-function openDrawer()  { document.getElementById('drawer').style.display = 'block'; document.getElementById('overlay').style.display = 'block'; }
-function closeDrawer() { document.getElementById('drawer').style.display = 'none';  document.getElementById('overlay').style.display = 'none'; }
+function openDr(){document.getElementById('drawer').style.display='block';document.getElementById('overlay').style.display='block';}
+function closeDr(){document.getElementById('drawer').style.display='none';document.getElementById('overlay').style.display='none';}
 
-function saveActivity(e) {
+function saveAct(e){
     e.preventDefault();
-    const name = document.getElementById('f-name').value;
-    const cat  = document.getElementById('f-cat').value;
-    const start = document.getElementById('f-start').value;
-    const end   = document.getElementById('f-end').value;
-    if(t2d(start) >= t2d(end)) { alert('La hora de inicio debe ser anterior a la de fin.'); return; }
-    let target = (currentView === 'calendar' && calSelectedDate) ? calSelectedDate : todayKey();
-    const blocks = getBlocks(target);
-    blocks.push({ id: Date.now().toString(), name, category: cat, start, end });
-    setBlocks(target, blocks);
-    closeDrawer();
-    document.getElementById('f-name').value = '';
-    if(currentView === 'today') renderToday(); else renderCalendar();
+    const n=document.getElementById('f-name').value,c=document.getElementById('f-cat').value,
+          s=document.getElementById('f-start').value,en=document.getElementById('f-end').value;
+    if(t2d(s)>=t2d(en)){alert('La hora de inicio debe ser anterior.');return;}
+    let target=(curTab==='cal'&&calSel)?calSel:tk();
+    // Desktop: if sidebar has a selected day, use that
+    if(window.innerWidth>=768&&calSel)target=calSel;
+    const bl=gb(target);bl.push({id:Date.now().toString(),name:n,category:c,start:s,end:en});sb(target,bl);
+    closeDr();document.getElementById('f-name').value='';
+    renderToday();renderCal();
 }
 
-function clearDay() {
-    if(!confirm('¿Vaciar las actividades de hoy?')) return;
-    setBlocks(todayKey(), []);
-    renderToday();
+function clearToday(){if(!confirm('¿Vaciar hoy?'))return;sb(tk(),[]);renderToday();}
+
+/* ─── SEED ─── */
+function seedAll(){if(!confirm('¿Recargar toda la rutina planificada?'))return;writeSeed();renderToday();renderCal();}
+function writeSeed(){
+    let id=1;
+    function b(n,c,s,e){return{id:String(id++),name:n,category:c,start:s,end:e};}
+    const W=()=>b('Trabajo','work','10:00','16:00'),V=()=>b('Viaje y despeje','travel','16:00','17:00'),
+          CL=()=>b('Cocinar y cenar','eat','20:00','22:00'),CN=()=>b('Cocinar y cenar','eat','22:00','24:00'),
+          OT=()=>b('Tiempo de ocio libre','rest','16:00','24:00');
+    sb('2026-05-31',[b('CS50','study','10:00','13:00'),b('Repaso Facultad','study','13:00','16:00'),OT()]);
+    sb('2026-06-01',[W(),V(),b('Física 1 – Práctica','study','17:00','20:00'),CL(),b('Prob y Est – Repaso conceptual','study','22:00','24:00')]);
+    sb('2026-06-02',[W(),V(),b('Repaso previo: Prob y Est','study','17:00','19:00'),b('Cursada: Prob y Estadística','study','19:00','22:00'),CN()]);
+    sb('2026-06-03',[W(),V(),b('Repaso previo: Costos','study','17:00','19:00'),b('Cursada: Costos Industriales','study','19:00','22:00'),CN()]);
+    sb('2026-06-04',[W(),V(),b('Prob y Est – Parciales viejos','study','17:00','20:00'),CL(),b('Física 1 – Repaso','study','22:00','24:00')]);
+    sb('2026-06-05',[W(),V(),b('Repaso previo: Física 1','study','17:00','19:00'),b('Cursada: Física 1','study','19:00','22:00'),CN()]);
+    sb('2026-06-06',[b('Física 1 – Estudio fuerte','study','10:00','13:00'),b('Prob y Est – Estudio fuerte','study','13:00','16:00'),OT()]);
+    sb('2026-06-07',[b('CS50','study','10:00','13:00'),b('Física 1 – Repaso','study','13:00','14:30'),b('Prob y Est – Repaso','study','14:30','16:00'),OT()]);
+    sb('2026-06-08',[W(),V(),b('Física 1 – Práctica','study','17:00','20:00'),CL(),b('Prob y Est – Repaso conceptual','study','22:00','24:00')]);
+    sb('2026-06-09',[W(),V(),b('Repaso previo: Prob y Est','study','17:00','19:00'),b('Cursada: Prob y Estadística','study','19:00','22:00'),CN()]);
+    sb('2026-06-10',[W(),V(),b('Repaso previo: Costos','study','17:00','19:00'),b('Cursada: Costos Industriales','study','19:00','22:00'),CN()]);
+    sb('2026-06-11',[W(),V(),b('Prob y Est – Parciales viejos','study','17:00','20:00'),CL(),b('Física 1 – Repaso','study','22:00','24:00')]);
+    sb('2026-06-12',[W(),V(),b('Repaso previo: Física 1','study','17:00','19:00'),b('Cursada: Física 1','study','19:00','22:00'),CN()]);
+    sb('2026-06-13',[b('Física 1 – Estudio fuerte','study','10:00','13:00'),b('Prob y Est – Estudio fuerte','study','13:00','16:00'),OT()]);
+    sb('2026-06-14',[b('CS50','study','10:00','13:00'),b('Física 1 – Repaso','study','13:00','14:30'),b('Prob y Est – Repaso','study','14:30','16:00'),OT()]);
+    sb('2026-06-15',[W(),V(),b('🔥 Prob y Est – INTENSIVO','study','17:00','20:00'),CL(),b('🔥 Prob y Est – FINAL','study','22:00','24:00')]);
+    sb('2026-06-16',[W(),V(),b('Repaso último momento','study','17:00','19:00'),b('📝 PARCIAL: Prob y Est','exam','19:00','22:00'),CN()]);
+    sb('2026-06-17',[W(),V(),b('Física 1 – Repaso intensivo','study','17:00','19:00'),b('Cursada: Costos Industriales','study','19:00','22:00'),CN()]);
+    sb('2026-06-18',[W(),V(),b('🔥 Física 1 – INTENSIVO','study','17:00','20:00'),CL(),b('🔥 Física 1 – FINAL','study','22:00','24:00')]);
+    sb('2026-06-19',[W(),V(),b('Repaso último momento','study','17:00','19:00'),b('📝 PARCIAL ÚNICO: Física 1','exam','19:00','22:00'),CN()]);
+    sb('2026-06-20',[b('Costos – Inicio fase intensiva','study','10:00','16:00'),OT()]);
+    sb('2026-06-21',[b('CS50','study','10:00','13:00'),b('Costos – Teoría','study','13:00','16:00'),OT()]);
+    sb('2026-06-22',[W(),V(),b('Costos – Ejercicios','study','17:00','20:00'),CL(),b('Costos – Teoría','study','22:00','24:00')]);
+    sb('2026-06-23',[W(),V(),b('Costos – Repaso','study','17:00','19:00'),b('Cursada: Prob y Estadística','study','19:00','22:00'),CN()]);
+    sb('2026-06-24',[W(),V(),b('Costos – Repaso previo','study','17:00','19:00'),b('Cursada: Costos Industriales','study','19:00','22:00'),CN()]);
+    sb('2026-06-25',[W(),V(),b('Costos – Ejercicios','study','17:00','20:00'),CL(),b('Costos – Presupuestos','study','22:00','24:00')]);
+    sb('2026-06-26',[W(),V(),b('Costos – Repaso','study','17:00','19:00'),b('Cursada: Física 1','study','19:00','22:00'),CN()]);
+    sb('2026-06-27',[b('Costos – Simulacro de examen','study','10:00','16:00'),OT()]);
+    sb('2026-06-28',[b('CS50','study','10:00','13:00'),b('Costos – Simulacro de examen','study','13:00','16:00'),OT()]);
+    sb('2026-06-29',[W(),V(),b('Costos – Repaso intensivo','study','17:00','20:00'),CL(),b('Costos – Repaso final','study','22:00','24:00')]);
+    sb('2026-06-30',[W(),V(),b('🔥 Costos – Repaso FINAL','study','17:00','19:00'),b('Cursada: Prob y Estadística','study','19:00','22:00'),b('🔥 Costos – Último repaso','study','22:00','24:00')]);
+    sb('2026-07-01',[W(),V(),b('Repaso último momento','study','17:00','19:00'),b('📝 PARCIAL: Costos Industriales','exam','19:00','22:00'),CN()]);
 }
 
 /* ─── CLOCK ─── */
-function updateClock() {
-    const n = new Date();
-    document.getElementById('clock').textContent = `${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
-    updateNowLine();
-}
+function tick(){const n=new Date();document.getElementById('clock').textContent=`${S(n.getHours())}:${S(n.getMinutes())}`;updateNow();}
 
 /* ─── INIT ─── */
-const today = new Date();
-calYear = today.getFullYear();
-calMonth = today.getMonth();
-calSelectedDate = todayKey();
-updateClock();
-setInterval(updateClock, 15000);
+const now=new Date();calY=now.getFullYear();calM=now.getMonth();calSel=tk();
+if(!localStorage.getItem('unidev_seeded_v2')){writeSeed();localStorage.setItem('unidev_seeded_v2','true');}
+tick();setInterval(tick,15000);
+renderToday();renderCal();
 
-/* Auto-seed on first visit */
-if(!localStorage.getItem('unidev_seeded')) {
-    writeSeedData();
-    localStorage.setItem('unidev_seeded', 'true');
-}
-
-renderToday();
+// Auto-scroll timeline to current hour
+setTimeout(()=>{
+    const sc=document.getElementById('tl-scroll');
+    const h=new Date().getHours();
+    if(h>=HS)sc.scrollTop=Math.max(0,(h-HS-1)*PX_H);
+},100);
 </script>
 </body>
 </html>
